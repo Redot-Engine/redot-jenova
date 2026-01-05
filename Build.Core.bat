@@ -1,0 +1,1 @@
+python ./Jenova.Builder.py --skip-cache --generate-rdsdk --skip-packaging --static-build --compiler win-msvc

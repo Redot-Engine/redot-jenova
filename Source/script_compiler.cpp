@@ -68,7 +68,7 @@ namespace jenova
                 internalDefaultSettings["cpp_output_map"]                       = "Jenova.Module.map";
                 internalDefaultSettings["cpp_output_database"]                  = "Jenova.Module.Database.pdb";
                 internalDefaultSettings["cpp_default_libs"]                     = "kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;delayimp.lib";
-                internalDefaultSettings["cpp_native_libs"]                      = "libGodot.x64.lib;";
+                internalDefaultSettings["cpp_native_libs"]                      = "libRedot.x64.lib;";
                 internalDefaultSettings["cpp_delayed_dll"]                      = "/DELAYLOAD:\"Jenova.Runtime.Win64.dll\"";
                 internalDefaultSettings["cpp_default_subsystem"]                = "Console";                        /* /SUBSYSTEM:CONSOLE [Console, GUI]*/
                 internalDefaultSettings["cpp_machine_architecture"]             = "Win64";                          /* /MACHINE:X64 [Win64, Win32]*/
@@ -112,7 +112,7 @@ namespace jenova
                 internalDefaultSettings["cpp_output_map"]                       = "Jenova.Module.map";
                 internalDefaultSettings["cpp_output_database"]                  = "Jenova.Module.Database.pdb";
                 internalDefaultSettings["cpp_default_libs"]                     = "kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;delayimp.lib";
-                internalDefaultSettings["cpp_native_libs"]                      = "libGodot.x64.lib;";
+                internalDefaultSettings["cpp_native_libs"]                      = "libRedot.x64.lib;";
                 internalDefaultSettings["cpp_delayed_dll"]                      = "/DELAYLOAD:\"Jenova.Runtime.Win64.dll\"";
                 internalDefaultSettings["cpp_default_subsystem"]                = "Console";                        /* /SUBSYSTEM:CONSOLE [Console, GUI]*/
                 internalDefaultSettings["cpp_machine_architecture"]             = "Win64";                          /* /MACHINE:X64 [Win64, Win32]*/
@@ -950,17 +950,17 @@ namespace jenova
             // Get Project Path
             String projectPath = jenova::GetJenovaProjectDirectory();
         
-            // Collect Compiler & GodotKit Packages
+            // Collect Compiler & RedotKit Packages
             String selectedCompilerPath = jenova::GetInstalledCompilerPathFromPackages(compilerSettings["cpp_toolchain_path"], GetCompilerModel());
-            String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
+            String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
 
-            // Validate Compiler & GodotKit Packages
+            // Validate Compiler & RedotKit Packages
             if (selectedCompilerPath == "Missing-Compiler-1.0.0")
             {
                 jenova::Error("Jenova Microsoft Compiler", "No Microsoft Compiler Detected On Build System, Install At Least One From Package Manager!");
                 return false;
             }
-            if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+            if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
             {
                 jenova::Error("Jenova Microsoft Compiler", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
                 return false;
@@ -968,7 +968,7 @@ namespace jenova
 
             // Globalize Paths
             selectedCompilerPath = ProjectSettings::get_singleton()->globalize_path(selectedCompilerPath);
-            selectedGodotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedGodotKitPath);
+            selectedRedotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedRedotKitPath);
 
             // Solve Compiler Paths
             this->projectPath = std::filesystem::absolute(AS_STD_STRING(projectPath)).string();
@@ -977,7 +977,7 @@ namespace jenova
             this->includePath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + String(compilerSettings["cpp_include_path"]))).string();
             this->libraryPath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + String(compilerSettings["cpp_library_path"]))).string();
             this->jenovaSDKPath = std::filesystem::absolute(AS_STD_STRING(projectPath + String(compilerSettings["cpp_jenovasdk_path"]))).string();
-            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedGodotKitPath)).string();
+            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedRedotKitPath)).string();
             this->jenovaCachePath = AS_STD_STRING(jenova::GetJenovaCacheDirectory());
 
             // Store Solved Paths
@@ -1044,7 +1044,7 @@ namespace jenova
                 internalDefaultSettings["cpp_debug_symbol"]                     = "Jenova.Module.pdb";              /* -Wl,--out-implib,Jenova.Module.pdb */
                 internalDefaultSettings["cpp_output_map"]                       = "Jenova.Module.map";              /* -Wl,-Map,Jenova.Module.map */
                 internalDefaultSettings["cpp_default_libs"]                     = "wldap32;bcrypt;dbghelp;delayimp";
-                internalDefaultSettings["cpp_native_libs"]                      = "libGodot.x64.a";
+                internalDefaultSettings["cpp_native_libs"]                      = "libRedot.x64.a";
                 internalDefaultSettings["cpp_delayed_dll"]                      = "";
                 internalDefaultSettings["cpp_default_subsystem"]                = "Console";                        /* -Wl,-subsystem,console / -Wl,-subsystem,windows */
                 internalDefaultSettings["cpp_machine_architecture"]             = "Win64";                          /* -m64 [Win64, Win32]*/
@@ -1082,7 +1082,7 @@ namespace jenova
                 internalDefaultSettings["cpp_debug_symbol"]                     = "Jenova.Module.pdb";              /* -Wl,--out-implib,Jenova.Module.pdb */
                 internalDefaultSettings["cpp_output_map"]                       = "Jenova.Module.map";              /* -Wl,-Map,Jenova.Module.map */
                 internalDefaultSettings["cpp_default_libs"]                     = "wldap32;bcrypt;dbghelp;delayimp";
-                internalDefaultSettings["cpp_native_libs"]                      = "libGodot.x64.a";
+                internalDefaultSettings["cpp_native_libs"]                      = "libRedot.x64.a";
                 internalDefaultSettings["cpp_delayed_dll"]                     = "-Xlinker /DELAYLOAD:Jenova.Runtime.Win64.dll";
                 internalDefaultSettings["cpp_default_subsystem"]                = "Console";                        /* -Wl,-subsystem,console / -Wl,-subsystem,windows */
                 internalDefaultSettings["cpp_machine_architecture"]             = "Win64";                          /* -m64 [Win64, Win32]*/
@@ -1792,17 +1792,17 @@ namespace jenova
             // Get Project Path
             String projectPath = jenova::GetJenovaProjectDirectory();
         
-            // Collect Compiler & GodotKit Packages
+            // Collect Compiler & RedotKit Packages
             String selectedCompilerPath = jenova::GetInstalledCompilerPathFromPackages(compilerSettings["cpp_toolchain_path"], GetCompilerModel());
-            String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
+            String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
 
-            // Validate Compiler & GodotKit Packages
+            // Validate Compiler & RedotKit Packages
             if (selectedCompilerPath == "Missing-Compiler-1.0.0")
             {
                 jenova::Error("Jenova MinGW Compiler", "No MinGW Compiler Detected On Build System, Install At Least One From Package Manager!");
                 return false;
             }
-            if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+            if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
             {
                 jenova::Error("Jenova MinGW Compiler", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
                 return false;
@@ -1810,7 +1810,7 @@ namespace jenova
 
             // Globalize Paths
             selectedCompilerPath = ProjectSettings::get_singleton()->globalize_path(selectedCompilerPath);
-            selectedGodotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedGodotKitPath);
+            selectedRedotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedRedotKitPath);
 
             // Solve Compiler Paths
             this->projectPath = std::filesystem::absolute(AS_STD_STRING(projectPath)).string();
@@ -1821,7 +1821,7 @@ namespace jenova
             this->includePath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + String(compilerSettings["cpp_include_path"]))).string();
             this->libraryPath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + String(compilerSettings["cpp_library_path"]))).string();
             this->jenovaSDKPath = std::filesystem::absolute(AS_STD_STRING(projectPath + String(compilerSettings["cpp_jenovasdk_path"]))).string();
-            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedGodotKitPath)).string();
+            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedRedotKitPath)).string();
             this->jenovaCachePath = AS_STD_STRING(jenova::GetJenovaCacheDirectory());
 
             // Store Solved Paths
@@ -1887,7 +1887,7 @@ namespace jenova
             internalDefaultSettings["cpp_output_module"]                    = "Jenova.Module.so";
             internalDefaultSettings["cpp_output_map"]                       = "Jenova.Module.map";
             internalDefaultSettings["cpp_default_libs"]                     = "m;pthread;dl;rt";
-            internalDefaultSettings["cpp_native_libs"]                      = "libGodot.x64.a;Jenova.Runtime.Linux64.so";
+            internalDefaultSettings["cpp_native_libs"]                      = "libRedot.x64.a;Jenova.Runtime.Linux64.so";
             internalDefaultSettings["cpp_machine_architecture"]             = "Linux64";                            // -m64
             internalDefaultSettings["cpp_machine_pe_type"]                  = "so";                                 // -shared
             internalDefaultSettings["cpp_dynamic_base"]                     = true;                                 // -fPIC
@@ -2586,17 +2586,17 @@ namespace jenova
             // Get Project Path
             String projectPath = jenova::GetJenovaProjectDirectory();
                     
-            // Collect Compiler & GodotKit Packages
+            // Collect Compiler & RedotKit Packages
             String selectedCompilerPath = jenova::GetInstalledCompilerPathFromPackages(compilerSettings["cpp_toolchain_path"], GetCompilerModel());
-            String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
+            String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
 
-            // Validate Compiler & GodotKit Packages
+            // Validate Compiler & RedotKit Packages
             if (selectedCompilerPath == "Missing-Compiler-1.0.0")
             {
                 jenova::Error("Jenova GNU Compiler", "No GNU Compiler Detected On Build System, Install At Least One From Package Manager!");
                 return false;
             }
-            if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+            if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
             {
                 jenova::Error("Jenova GNU Compiler", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
                 return false;
@@ -2604,7 +2604,7 @@ namespace jenova
 
             // Globalize Paths
             selectedCompilerPath = ProjectSettings::get_singleton()->globalize_path(selectedCompilerPath);
-            selectedGodotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedGodotKitPath);
+            selectedRedotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedRedotKitPath);
 
             // Solve Compiler Paths
             this->projectPath = std::filesystem::absolute(AS_STD_STRING(projectPath)).string();
@@ -2612,7 +2612,7 @@ namespace jenova
             this->libraryPath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + (String)compilerSettings["cpp_library_path"])).string();
             this->jenovaPath = std::filesystem::absolute(AS_STD_STRING(projectPath + (String)compilerSettings["cpp_jenova_path"])).string();           
             this->jenovaSDKPath = std::filesystem::absolute(AS_STD_STRING(projectPath + (String)compilerSettings["cpp_jenovasdk_path"])).string();
-            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedGodotKitPath)).string();
+            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedRedotKitPath)).string();
             this->jenovaCachePath = AS_STD_STRING(jenova::GetJenovaCacheDirectory());
 
             // Store Solved Paths
@@ -2718,17 +2718,17 @@ namespace jenova
             // Get Project Path
             String projectPath = jenova::GetJenovaProjectDirectory();
                     
-            // Collect Compiler & GodotKit Packages
+            // Collect Compiler & RedotKit Packages
             String selectedCompilerPath = jenova::GetInstalledCompilerPathFromPackages(compilerSettings["cpp_toolchain_path"], GetCompilerModel());
-            String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
+            String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(compilerSettings["cpp_godotsdk_path"]);
 
-            // Validate Compiler & GodotKit Packages
+            // Validate Compiler & RedotKit Packages
             if (selectedCompilerPath == "Missing-Compiler-1.0.0")
             {
                 jenova::Error("Jenova Clang Compiler", "No Clang Compiler Detected On Build System, Install At Least One From Package Manager!");
                 return false;
             }
-            if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+            if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
             {
                 jenova::Error("Jenova Clang Compiler", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
                 return false;
@@ -2736,7 +2736,7 @@ namespace jenova
 
             // Globalize Paths
             selectedCompilerPath = ProjectSettings::get_singleton()->globalize_path(selectedCompilerPath);
-            selectedGodotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedGodotKitPath);
+            selectedRedotKitPath = ProjectSettings::get_singleton()->globalize_path(selectedRedotKitPath);
 
             // Solve Compiler Paths
             this->projectPath = std::filesystem::absolute(AS_STD_STRING(projectPath)).string();
@@ -2744,7 +2744,7 @@ namespace jenova
             this->libraryPath = std::filesystem::absolute(AS_STD_STRING(selectedCompilerPath + (String)compilerSettings["cpp_library_path"])).string();
             this->jenovaPath = std::filesystem::absolute(AS_STD_STRING(projectPath + (String)compilerSettings["cpp_jenova_path"])).string();           
             this->jenovaSDKPath = std::filesystem::absolute(AS_STD_STRING(projectPath + (String)compilerSettings["cpp_jenovasdk_path"])).string();
-            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedGodotKitPath)).string();
+            this->godotSDKPath = std::filesystem::absolute(AS_STD_STRING(selectedRedotKitPath)).string();
             this->jenovaCachePath = AS_STD_STRING(jenova::GetJenovaCacheDirectory());
 
             // Store Solved Paths

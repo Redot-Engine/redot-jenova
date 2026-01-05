@@ -463,7 +463,7 @@ namespace jenova
 						if (!editor_settings->has_setting(UseMonospaceFontForTerminalConfigPath)) editor_settings->set(UseMonospaceFontForTerminalConfigPath, true);
 						if (!editor_settings->has_setting(TerminalDefaultFontSizeConfigPath)) editor_settings->set(TerminalDefaultFontSizeConfigPath, jenova::GlobalSettings::JenovaTerminalLogFontSize);
 						if (!editor_settings->has_setting(CompilerPackageConfigPath)) editor_settings->set(CompilerPackageConfigPath, "Latest");
-						if (!editor_settings->has_setting(GodotKitPackageConfigPath)) editor_settings->set(GodotKitPackageConfigPath, "Latest");
+						if (!editor_settings->has_setting(RedotKitPackageConfigPath)) editor_settings->set(RedotKitPackageConfigPath, "Latest");
 						if (!editor_settings->has_setting(ManagedSafeExecutionConfigPath)) editor_settings->set(ManagedSafeExecutionConfigPath, true);
 						if (!editor_settings->has_setting(UseBuiltinSDKConfigPath)) editor_settings->set(UseBuiltinSDKConfigPath, true);
 						if (!editor_settings->has_setting(RefreshTreeAfterBuildConfigPath)) editor_settings->set(RefreshTreeAfterBuildConfigPath, false);
@@ -472,7 +472,7 @@ namespace jenova
 
 						// Add the Setting Descriptions to The Editor Settings
 						PropertyInfo RemoveSourcesFromBuildProperty(Variant::BOOL, RemoveSourcesFromBuildEditorConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(RemoveSourcesFromBuildProperty);
 						editor_settings->set_initial_value(RemoveSourcesFromBuildEditorConfigPath, true, false);
 
@@ -481,151 +481,150 @@ namespace jenova
 						if (QUERY_PLATFORM(Windows)) availableCompilers = "Microsoft Visual C++ (MSVC),LLVM Toolchain (Clang-cl),MinGW Standard (GCC),MinGW LLVM Toolchain (Clang)";
 						if (QUERY_PLATFORM(Linux)) availableCompilers = "GNU Compiler Collection (GCC),LLVM Toolchain (Clang)";					
 						PropertyInfo CompilerModelProperty(Variant::INT, CompilerModelConfigPath, 
-							PropertyHint::PROPERTY_HINT_ENUM, availableCompilers,
-							PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_ENUM, availableCompilers, PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(CompilerModelProperty);
 						editor_settings->set_initial_value(CompilerModelConfigPath, int32_t(CompilerDefaultModel), false);
 
 						// Multi-Threaded Compilation Property
 						PropertyInfo MultiThreadedCompilationProperty(Variant::BOOL, MultiThreadedCompilationConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(MultiThreadedCompilationProperty);
 						editor_settings->set_initial_value(MultiThreadedCompilationConfigPath, true, false);
 
 						// Generate Debug Information Property
 						PropertyInfo CompilerGenerateDebugInformationProperty(Variant::BOOL, GenerateDebugInformationConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(CompilerGenerateDebugInformationProperty);
 						editor_settings->set_initial_value(GenerateDebugInformationConfigPath, true, false);
 
 						// Interpreter Backend Property
 						PropertyInfo InterpreterBackendProperty(Variant::INT, InterpreterBackendConfigPath,
 							PropertyHint::PROPERTY_HINT_ENUM, "NitroJIT (Fastest),Meteora (Fast),Halo (Soon)",
-							PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(InterpreterBackendProperty);
 						editor_settings->set_initial_value(InterpreterBackendConfigPath, int32_t(InterpreterBackendDefaultMode), false);
 
 						// Profiling Mode Property
 						PropertyInfo ProfilingModeProperty(Variant::INT, ProfilingModeConfigPath,
-							PropertyHint::PROPERTY_HINT_ENUM, "Disabled,Echo,Sentinel,Monitor", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_ENUM, "Disabled,Echo,Sentinel,Monitor", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(ProfilingModeProperty);
 						editor_settings->set_initial_value(ProfilingModeConfigPath, int32_t(ProfilingModeDefaultMode), false);
 
 						// Build And Run Mode Property
 						PropertyInfo BuildAndRunModeProperty(Variant::INT, BuildAndRunModeConfigPath, 
 							PropertyHint::PROPERTY_HINT_ENUM, "Run Game After Successful Build,Build Project Before Running Game,Don't Take Any Action",
-							PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(BuildAndRunModeProperty);
 						editor_settings->set_initial_value(BuildAndRunModeConfigPath, int32_t(BuildAndRunDefaultMode), false);
 
 						// Preprocessor Definitions Property
 						PropertyInfo PreprocessorDefinitionsProperty(Variant::STRING, PreprocessorDefinitionsConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(PreprocessorDefinitionsProperty);
 						editor_settings->set_initial_value(PreprocessorDefinitionsConfigPath, "JENOVA_CUSTOM", false);
 
 						// Additional Include Directories Property
 						PropertyInfo AdditionalIncludeDirectoriesProperty(Variant::STRING, AdditionalIncludeDirectoriesConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(AdditionalIncludeDirectoriesProperty);
 						editor_settings->set_initial_value(AdditionalIncludeDirectoriesConfigPath, "", false);
 
 						// Additional Library Directories Property
 						PropertyInfo AdditionalLibraryDirectoriesProperty(Variant::STRING, AdditionalLibraryDirectoriesConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(AdditionalLibraryDirectoriesProperty);
 						editor_settings->set_initial_value(AdditionalLibraryDirectoriesConfigPath, "", false);
 
 						// Additional Dependencies Property
 						PropertyInfo AdditionalDependenciesProperty(Variant::STRING, AdditionalDependenciesConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(AdditionalDependenciesProperty);
 						editor_settings->set_initial_value(AdditionalDependenciesConfigPath, "", false);
 
 						// Custom Compiler Commands Property
 						PropertyInfo CustomCompilerCommandsProperty(Variant::STRING, CustomCompilerCommandsConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(CustomCompilerCommandsProperty);
 						editor_settings->set_initial_value(CustomCompilerCommandsConfigPath, "", false);
 
 						// Custom Linker Commands Property
 						PropertyInfo CustomLinkerCommandsProperty(Variant::STRING, CustomLinkerCommandsConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(CustomLinkerCommandsProperty);
 						editor_settings->set_initial_value(CustomLinkerCommandsConfigPath, "", false);
 
 						// External Changes Trigger Mode Property
 						PropertyInfo ExternalChangesTriggerModeProperty(Variant::INT, ExternalChangesTriggerModeConfigPath, 
 							PropertyHint::PROPERTY_HINT_ENUM, "Build Project On Script Reload,Build Project On Script Change,Bootstrap Project On Watchdog Invoke,Don't Take Any Action",
-							PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(ExternalChangesTriggerModeProperty);
 						editor_settings->set_initial_value(ExternalChangesTriggerModeConfigPath, int32_t(ExternalChangesDefaultTriggerMode), false);
 						
 						// Use Hot Reload At Runtime Property
 						PropertyInfo UseHotReloadAtRuntimeProperty(Variant::BOOL, UseHotReloadAtRuntimeConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(UseHotReloadAtRuntimeProperty);
 						editor_settings->set_initial_value(UseHotReloadAtRuntimeConfigPath, true, false);
 						
 						// Editor Verbose Output Property
 						PropertyInfo EditorVerboseOutputProperty(Variant::INT, EditorVerboseOutputConfigPath, 
 							PropertyHint::PROPERTY_HINT_ENUM, "Standard Editor Output,Dedicated Log System,Disabled",
-							PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(EditorVerboseOutputProperty);
 						editor_settings->set_initial_value(EditorVerboseOutputConfigPath, int32_t(EditorVerboseDefaultOutput), false);
 
 						// Use Monospace Font For Terminal Property
 						PropertyInfo UseMonospaceFontForTerminalProperty(Variant::BOOL, UseMonospaceFontForTerminalConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(UseMonospaceFontForTerminalProperty);
 						editor_settings->set_initial_value(UseMonospaceFontForTerminalConfigPath, true, false);
 
 						// Terminal Default Font Size Property
 						PropertyInfo TerminalDefaultFontSizeProperty(Variant::INT, TerminalDefaultFontSizeConfigPath, 
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(TerminalDefaultFontSizeProperty);
 						editor_settings->set_initial_value(TerminalDefaultFontSizeConfigPath, jenova::GlobalSettings::JenovaTerminalLogFontSize, false);
 
 						// Compiler Package Property
 						PropertyInfo CompilerPackageProperty(Variant::STRING, CompilerPackageConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(CompilerPackageProperty);
 						editor_settings->set_initial_value(CompilerPackageConfigPath, "Latest", false);
 
-						// GodotKit Package Property
-						PropertyInfo GodotKitPackageProperty(Variant::STRING, GodotKitPackageConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
-						editor_settings->add_property_info(GodotKitPackageProperty);
-						editor_settings->set_initial_value(GodotKitPackageConfigPath, "Latest", false);
+						// RedotKit Package Property
+						PropertyInfo RedotKitPackageProperty(Variant::STRING, RedotKitPackageConfigPath,
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
+						editor_settings->add_property_info(RedotKitPackageProperty);
+						editor_settings->set_initial_value(RedotKitPackageConfigPath, "Latest", false);
 
 						// Managed Safe Execution (MSE) Property
 						PropertyInfo ManagedSafeExecutionProperty(Variant::BOOL, ManagedSafeExecutionConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(ManagedSafeExecutionProperty);
 						editor_settings->set_initial_value(ManagedSafeExecutionConfigPath, true, false);
 
 						// Managed Safe Execution (MSE) Property
 						PropertyInfo UseBuiltinSDKProperty(Variant::BOOL, UseBuiltinSDKConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(UseBuiltinSDKProperty);
 						editor_settings->set_initial_value(UseBuiltinSDKConfigPath, true, false);
 
 						// Refresh Scene Tree After Build Property
 						PropertyInfo RefreshTreeAfterBuildProperty(Variant::BOOL, RefreshTreeAfterBuildConfigPath,
-							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(RefreshTreeAfterBuildProperty);
 						editor_settings->set_initial_value(RefreshTreeAfterBuildConfigPath, false, false);
 
 						// Package Repository Path Property
 						PropertyInfo PackageRepositoryPathProperty(Variant::STRING, PackageRepositoryPathConfigPath,
-							PropertyHint::PROPERTY_HINT_DIR, "", PROPERTY_USAGE_DEFAULT, JenovaEditorSettingsCategory);
+							PropertyHint::PROPERTY_HINT_DIR, "", PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(PackageRepositoryPathProperty);
 						editor_settings->set_initial_value(PackageRepositoryPathConfigPath, jenova::GlobalSettings::JenovaPackageRepositoryPath, false);
 
 						// Build Tool Button Placement Property
 						String buttonPlacements = "Before Main Menu,After Main Menu,Before Stage Selector,After Stage Selector,Before Run Bar,After Run Bar,After Render Method";
 						PropertyInfo BuildToolButtonPlacementProperty(Variant::INT, BuildToolButtonEditorConfigPath, PropertyHint::PROPERTY_HINT_ENUM, buttonPlacements,
-							PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED, JenovaEditorSettingsCategory);
+							PROPERTY_USAGE_NONE, JenovaEditorSettingsCategory);
 						editor_settings->add_property_info(BuildToolButtonPlacementProperty);
 						editor_settings->set_initial_value(BuildToolButtonEditorConfigPath, int32_t(BuildToolButtonDefaultPlacement), false);
 
@@ -1831,9 +1830,9 @@ namespace jenova
 					{
 						jenova::Error("Jenova Interpreter", "Unable to Load Compiled Jenova Module, Check for Missing Dependencies.\n\n"
 							"This error may be caused by one of the following:\n"
-							"  1. A Godot type is defined in global scope which is not allowed by Godot design.\n"
+							"  1. A Redot type is defined in global scope which is not allowed by Redot design.\n"
 							"  2. A required linked library is missing, Make sure all dependencies are placed beside engine.\n"
-							"  3. The engine version does not match the Godot Kit. Make sure you are using correct GodotSDK."
+							"  3. The engine version does not match the Redot Kit. Make sure you are using correct RedotSDK."
 						);
 						DisposeCompiler();
 						return false;
@@ -1849,9 +1848,9 @@ namespace jenova
 					{
 						jenova::Error("Jenova Interpreter", "Unable to Reload Compiled Jenova Module, Check for Missing Dependencies.\n\n"
 							"This error may be caused by one of the following:\n"
-							"  1. A Godot type is defined in global scope which is not allowed by Godot design.\n"
+							"  1. A Redot type is defined in global scope which is not allowed by Redot design.\n"
 							"  2. A required linked library is missing, Make sure all dependencies are placed beside engine.\n"
-							"  3. The engine version does not match the Godot Kit. Make sure you are using correct GodotSDK."
+							"  3. The engine version does not match the Redot Kit. Make sure you are using correct RedotSDK."
 						);
 						DisposeCompiler();
 						return false;
@@ -2118,9 +2117,9 @@ namespace jenova
 						{
 							jenova::Error("Jenova Interpreter", "Unable to Load Bootstrapped Jenova Module, Check for Missing Dependencies.\n\n"
 								"This error may be caused by one of the following:\n"
-								"  1. A Godot type is defined in global scope which is not allowed by Godot design.\n"
+								"  1. A Redot type is defined in global scope which is not allowed by Redot design.\n"
 								"  2. A required linked library is missing, Make sure all dependencies are placed beside engine.\n"
-								"  3. The engine version does not match the Godot Kit. Make sure you are using correct GodotSDK."
+								"  3. The engine version does not match the Redot Kit. Make sure you are using correct RedotSDK."
 							);
 							return false;
 						}
@@ -2135,9 +2134,9 @@ namespace jenova
 						{
 							jenova::Error("Jenova Interpreter", "Unable to Reload Bootstrapped Jenova Module, Check for Missing Dependencies.\n\n"
 								"This error may be caused by one of the following:\n"
-								"  1. A Godot type is defined in global scope which is not allowed by Godot design.\n"
+								"  1. A Redot type is defined in global scope which is not allowed by Redot design.\n"
 								"  2. A required linked library is missing, Make sure all dependencies are placed beside engine.\n"
-								"  3. The engine version does not match the Godot Kit. Make sure you are using correct GodotSDK."
+								"  3. The engine version does not match the Redot Kit. Make sure you are using correct RedotSDK."
 							);
 							return false;
 						}
@@ -2195,8 +2194,8 @@ namespace jenova
 				if (!GetEditorSetting(CustomLinkerCommandsConfigPath, customLinkerCommands)) return false;
 				Variant compilerPackage;
 				if (!GetEditorSetting(CompilerPackageConfigPath, compilerPackage)) return false;
-				Variant godotKitPackage;
-				if (!GetEditorSetting(GodotKitPackageConfigPath, godotKitPackage)) return false;
+				Variant RedotKitPackage;
+				if (!GetEditorSetting(RedotKitPackageConfigPath, RedotKitPackage)) return false;
 
 				// Initialize Compiler Compiler
 				switch (jenova::CompilerModel(int32_t(compilerModel)))
@@ -2311,9 +2310,9 @@ namespace jenova
 					DisposeCompiler();
 					return false;
 				};
-				if (!jenovaCompiler->SetCompilerOption("cpp_godotsdk_path", String(godotKitPackage)))
+				if (!jenovaCompiler->SetCompilerOption("cpp_godotsdk_path", String(RedotKitPackage)))
 				{
-					jenova::Error("Jenova Builder", "Failed to Set Compiler Setting 'GodotKit Package'");
+					jenova::Error("Jenova Builder", "Failed to Set Compiler Setting 'RedotKit Package'");
 					DisposeCompiler();
 					return false;
 				};
@@ -2809,18 +2808,18 @@ namespace jenova
 				std::string extraIncludeDirectories = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_include_directories")));
 				std::string extralibraryDirectories = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_library_directories")));
 				std::string extraLibraries = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_libs")));
-				std::string nativeLibraries = "libGodot.x64.lib;";
+				std::string nativeLibraries = "libRedot.x64.lib;";
 				std::string delayedDlls = "Jenova.Runtime.Win64.dll;";
 				std::string forcedHeaders = jenova::GlobalSettings::ForceJenovaSDKHeader && jenova::GlobalStorage::UseBuiltinSDK ? "JenovaSDK.h;" : "";
 
-				// Solve GodotKit Path
-				String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
-				if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+				// Solve RedotKit Path
+				String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
+				if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
 				{
-					jenova::Error("Visual Studio Exporter", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
+					jenova::Error("Visual Studio Exporter", "No RedotSDK Detected On Build System, Install At Least One From Package Manager!");
 					return false;
 				}
-				std::string solvedGodotKitPath = jenova::SolveGodotKitPathForExporters(selectedGodotKitPath);
+				std::string solvedRedotKitPath = jenova::SolveRedotKitPathForExporters(selectedRedotKitPath);
 
 				// Adjust Compiler Settings
 				if (!extraIncludeDirectories.empty() && extraIncludeDirectories.back() != ';') extraIncludeDirectories.push_back(';');
@@ -2925,8 +2924,8 @@ namespace jenova
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@LANGUAGE_STANDARD@@", "std" + languageStandard);
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@OPEN_MP_SUPPORT@@", openMPSupport ? "true" : "false");
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@PREPROCESSOR_DEFINITIONS@@", cpp_definitions);
-				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@ADDITIONALINCLUDEDIRECTORIES@@", "./;./Jenova/JenovaSDK;" + solvedGodotKitPath + ";" + extraIncludeDirectories);
-				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@ADDITIONALLIBRARYDIRECTORIES@@", "./;./Jenova/JenovaSDK;" + solvedGodotKitPath + ";" + extralibraryDirectories);
+				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@ADDITIONALINCLUDEDIRECTORIES@@", "./;./Jenova/JenovaSDK;" + solvedRedotKitPath + ";" + extraIncludeDirectories);
+				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@ADDITIONALLIBRARYDIRECTORIES@@", "./;./Jenova/JenovaSDK;" + solvedRedotKitPath + ";" + extralibraryDirectories);
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@ADDITIONALDEPENDENCIES@@", nativeLibraries + extraLibraries + "%(AdditionalDependencies)");
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@DELAYLOADDLLS@@", delayedDlls);
 				jenova::ReplaceAllMatchesWithString(projectTemplate, "@@FORCEDINCLUDEFILES@@", forcedHeaders);
@@ -3138,14 +3137,14 @@ namespace jenova
 				std::string extraIncludeDirectories = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_include_directories")));
 				std::string forcedHeaders = jenova::GlobalSettings::ForceJenovaSDKHeader && jenova::GlobalStorage::UseBuiltinSDK ? "JenovaSDK.h;" : "";
 
-				// Solve GodotKit Path
-				String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
-				if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+				// Solve RedotKit Path
+				String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
+				if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
 				{
-					jenova::Error("Visual Studio Exporter", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
+					jenova::Error("Visual Studio Exporter", "No RedotSDK Detected On Build System, Install At Least One From Package Manager!");
 					return false;
 				}
-				std::string solvedGodotKitPath = jenova::SolveGodotKitPathForExporters(selectedGodotKitPath);
+				std::string solvedRedotKitPath = jenova::SolveRedotKitPathForExporters(selectedRedotKitPath);
 
 				// Adjust Compiler Settings
 				if (!extraIncludeDirectories.empty() && extraIncludeDirectories.back() != ';') extraIncludeDirectories.push_back(';');
@@ -3197,7 +3196,7 @@ namespace jenova
 					configuration["cStandard"] = "c17";
 					configuration["cppStandard"] = "c++20";
 					configuration["compilerPath"] = std::filesystem::absolute(compilerBinary).string();
-					configuration["includePath"] = CreateJsonArrayFromString("./;./Jenova/JenovaSDK;" + solvedGodotKitPath + ";" + extraIncludeDirectories);
+					configuration["includePath"] = CreateJsonArrayFromString("./;./Jenova/JenovaSDK;" + solvedRedotKitPath + ";" + extraIncludeDirectories);
 					configuration["forcedInclude"] = CreateJsonArrayFromString(forcedHeaders);
 					configuration["defines"] = CreateJsonArrayFromString(cpp_definitions);
 					configuration["intelliSenseMode"] = intelliSenseMode;
@@ -3308,14 +3307,14 @@ namespace jenova
 				std::string extraIncludeDirectories = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_include_directories")));
 				std::string forcedHeaders = jenova::GlobalSettings::ForceJenovaSDKHeader && jenova::GlobalStorage::UseBuiltinSDK ? "JenovaSDK.h;" : "";
 
-				// Solve GodotKit Path
-				String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
-				if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+				// Solve RedotKit Path
+				String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
+				if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
 				{
-					jenova::Error("CLion Exporter", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
+					jenova::Error("CLion Exporter", "No RedotSDK Detected On Build System, Install At Least One From Package Manager!");
 					return false;
 				}
-				std::string solvedGodotKitPath = jenova::SolveGodotKitPathForExporters(selectedGodotKitPath);
+				std::string solvedRedotKitPath = jenova::SolveRedotKitPathForExporters(selectedRedotKitPath);
 
 				// Adjust Compiler Settings
 				if (!extraIncludeDirectories.empty() && extraIncludeDirectories.back() != ';') extraIncludeDirectories.push_back(';');
@@ -3376,7 +3375,7 @@ namespace jenova
 					cmake << "target_include_directories(Jenova PRIVATE\n";
 					cmake << "    ${CMAKE_CURRENT_SOURCE_DIR}\n";
 					cmake << "    ${CMAKE_CURRENT_SOURCE_DIR}/Jenova/JenovaSDK\n";
-					cmake << "    ${CMAKE_CURRENT_SOURCE_DIR}/" << solvedGodotKitPath << "\n";
+					cmake << "    ${CMAKE_CURRENT_SOURCE_DIR}/" << solvedRedotKitPath << "\n";
 					for (auto& inc : SplitList(extraIncludeDirectories)) cmake << "    \"" << jenova::NormalizePath(inc) << "\"\n";
 					cmake << ")\n\n";
 
@@ -3495,14 +3494,14 @@ namespace jenova
 				// Solve Compiler Settings
 				if (!bool(jenovaCompiler->ExecuteCommand("Solve-Compiler-Settings", Dictionary()))) return false;
 
-				// Solve GodotKit Path
-				String selectedGodotKitPath = jenova::GetInstalledGodotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
-				if (selectedGodotKitPath == "Missing-GodotKit-1.0.0")
+				// Solve RedotKit Path
+				String selectedRedotKitPath = jenova::GetInstalledRedotKitPathFromPackages(jenovaCompiler->GetCompilerOption("cpp_godotsdk_path"));
+				if (selectedRedotKitPath == "Missing-RedotKit-1.0.0")
 				{
-					jenova::Error("Neovim Exporter", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
+					jenova::Error("Neovim Exporter", "No RedotSDK Detected On Build System, Install At Least One From Package Manager!");
 					return false;
 				}
-				std::string solvedGodotKitPath = jenova::SolveGodotKitPathForExporters(selectedGodotKitPath);
+				std::string solvedRedotKitPath = jenova::SolveRedotKitPathForExporters(selectedRedotKitPath);
 
 				// Extra Includes
 				std::string extraIncludeDirectories = AS_STD_STRING(String(jenovaCompiler->GetCompilerOption("cpp_extra_include_directories")));
@@ -3515,7 +3514,7 @@ namespace jenova
 				{
 					"-I./",
 					"-I./Jenova/JenovaSDK",
-					"-I" + solvedGodotKitPath
+					"-I" + solvedRedotKitPath
 				};
 
 				// Append Extra Includes
@@ -3607,18 +3606,18 @@ namespace jenova
 				}
 				auto compilerModel = jenova::CompilerModel(int32_t(compilerModelSetting));
 
-				// Collect Compiler & GodotKit Packages
+				// Collect Compiler & RedotKit Packages
 				auto compilerPackages = jenova::GetInstalledCompilerPackages(compilerModel);
-				auto godotKitPackages = jenova::GetInstalledGodotKitPackages();
+				auto RedotKitPackages = jenova::GetInstalledRedotKitPackages();
 
-				// Validate Compiler & GodotKit Packages
+				// Validate Compiler & RedotKit Packages
 				if (compilerPackages.size() == 0)
 				{
 					jenova::Warning("Jenova Build Configurer", "No Compiler for Selected Compiler Model Detected On Build System, Install At Least One From Package Manager!");
 				}
-				if (godotKitPackages.size() == 0)
+				if (RedotKitPackages.size() == 0)
 				{
-					jenova::Error("Jenova Build Configurer", "No GodotSDK Detected On Build System, Install At Least One From Package Manager!");
+					jenova::Error("Jenova Build Configurer", "No RedotSDK Detected On Build System, Install At Least One From Package Manager!");
 					return;
 				}
 
@@ -3686,25 +3685,25 @@ namespace jenova
 				compiler_selector->select(compiler_selector->get_item_count() - 1);
 				window_surface->add_child(compiler_selector);
 	
-				Label* godotkit_package_label = memnew(Label);
-				godotkit_package_label->set_name("GodotKitLabel");
-				godotkit_package_label->set_anchors_and_offsets_preset(Control::PRESET_TOP_WIDE);
-				godotkit_package_label->set_anchor_and_offset(Side::SIDE_TOP, 0.0, SCALED(90.0));
-				godotkit_package_label->set_anchor_and_offset(Side::SIDE_BOTTOM, 0.0, SCALED(112.0));
-				godotkit_package_label->add_theme_font_size_override("font_size", SCALED(15));
-				godotkit_package_label->set_text("Available GodotKits");
-				window_surface->add_child(godotkit_package_label);
+				Label* RedotKit_package_label = memnew(Label);
+				RedotKit_package_label->set_name("RedotKitLabel");
+				RedotKit_package_label->set_anchors_and_offsets_preset(Control::PRESET_TOP_WIDE);
+				RedotKit_package_label->set_anchor_and_offset(Side::SIDE_TOP, 0.0, SCALED(90.0));
+				RedotKit_package_label->set_anchor_and_offset(Side::SIDE_BOTTOM, 0.0, SCALED(112.0));
+				RedotKit_package_label->add_theme_font_size_override("font_size", SCALED(15));
+				RedotKit_package_label->set_text("Available RedotKits");
+				window_surface->add_child(RedotKit_package_label);
 
-				OptionButton* godotkit_selector = memnew(OptionButton);
-				godotkit_selector->set_name("GodotKitSelector");
-				godotkit_selector->set_anchors_and_offsets_preset(Control::PRESET_TOP_WIDE);
-				godotkit_selector->set_anchor_and_offset(Side::SIDE_TOP, 0.0, SCALED(119.0));
-				godotkit_selector->set_anchor_and_offset(Side::SIDE_BOTTOM, 0.0, SCALED(164.0));
-				godotkit_selector->add_theme_color_override("font_color", editor_theme->get_color("accent_color", "Editor"));
-				for (const auto& godotKitPackage : godotKitPackages) godotkit_selector->add_item(" " + godotKitPackage.pkgDestination.get_file());
-				godotkit_selector->add_item(" Latest");
-				godotkit_selector->select(godotkit_selector->get_item_count() - 1);
-				window_surface->add_child(godotkit_selector);
+				OptionButton* RedotKit_selector = memnew(OptionButton);
+				RedotKit_selector->set_name("RedotKitSelector");
+				RedotKit_selector->set_anchors_and_offsets_preset(Control::PRESET_TOP_WIDE);
+				RedotKit_selector->set_anchor_and_offset(Side::SIDE_TOP, 0.0, SCALED(119.0));
+				RedotKit_selector->set_anchor_and_offset(Side::SIDE_BOTTOM, 0.0, SCALED(164.0));
+				RedotKit_selector->add_theme_color_override("font_color", editor_theme->get_color("accent_color", "Editor"));
+				for (const auto& RedotKitPackage : RedotKitPackages) RedotKit_selector->add_item(" " + RedotKitPackage.pkgDestination.get_file());
+				RedotKit_selector->add_item(" Latest");
+				RedotKit_selector->select(RedotKit_selector->get_item_count() - 1);
+				window_surface->add_child(RedotKit_selector);
 
 				Button* configure_button = memnew(Button);
 				configure_button->set_name("ConfigureButton");
@@ -3728,18 +3727,18 @@ namespace jenova
 					void OnConfigureButtonClick()
 					{
 						OptionButton* compilerSelector = window->get_node<OptionButton>("ConfigureBuildWindow/WindowSurface/CompilerSelector");
-						OptionButton* godotKitSelector = window->get_node<OptionButton>("ConfigureBuildWindow/WindowSurface/GodotKitSelector");
-						if (compilerSelector && godotKitSelector)
+						OptionButton* RedotKitSelector = window->get_node<OptionButton>("ConfigureBuildWindow/WindowSurface/RedotKitSelector");
+						if (compilerSelector && RedotKitSelector)
 						{
 							if (!compilerSelector->is_disabled())
 							{
 								String selectedCompiler = compilerSelector->get_item_text(compilerSelector->get_selected_id()).replace(" ", "");
 								EditorInterface::get_singleton()->get_editor_settings()->set_setting(JenovaSettings::CompilerPackageConfigPath, selectedCompiler);
 							}
-							if (!godotKitSelector->is_disabled())
+							if (!RedotKitSelector->is_disabled())
 							{
-								String selectedGodotKit = godotKitSelector->get_item_text(godotKitSelector->get_selected_id()).replace(" ", "");
-								EditorInterface::get_singleton()->get_editor_settings()->set_setting(JenovaSettings::GodotKitPackageConfigPath, selectedGodotKit);
+								String selectedRedotKit = RedotKitSelector->get_item_text(RedotKitSelector->get_selected_id()).replace(" ", "");
+								EditorInterface::get_singleton()->get_editor_settings()->set_setting(JenovaSettings::RedotKitPackageConfigPath, selectedRedotKit);
 							}
 							jenova::OutputColored("#2ebc78", "Project Build Configuration Updated Successfully!");
 						}
@@ -3930,11 +3929,11 @@ namespace jenova
 				about_image->set_anchors_preset(Control::PRESET_LEFT_WIDE);
 				about_image->set_offset(Side::SIDE_LEFT, SCALED(30.0));
 				about_image->set_offset(Side::SIDE_TOP, SCALED(30.0));
-				about_image->set_offset(Side::SIDE_RIGHT, SCALED(300.0));
+				about_image->set_offset(Side::SIDE_RIGHT, SCALED(305.0));
 				about_image->set_offset(Side::SIDE_BOTTOM, SCALED(-30.0));
 				about_image->set_v_grow_direction(Control::GROW_DIRECTION_BOTH);
 				about_image->set_expand_mode(TextureRect::ExpandMode::EXPAND_FIT_HEIGHT); 
-				about_image->set_texture(jenova::CreateImageTextureFromByteArray(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(JPEG_ABOUT_IMAGE)), ImageCreationFormat::JPG));
+				about_image->set_texture(jenova::CreateImageTextureFromByteArray(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(PNG_ABOUT_IMAGE))));
 				jenova_about_ui->add_child(about_image);
 
 				// Add Title Label
@@ -3945,8 +3944,8 @@ namespace jenova
 				title->set_offset(Side::SIDE_RIGHT, SCALED(660.0));
 				title->set_offset(Side::SIDE_BOTTOM, SCALED(77.0));
 				title->add_theme_color_override("font_color", editor_theme->get_color("accent_color", "Editor"));
-				title->add_theme_font_size_override("font_size", SCALED(35));
-				title->set_text("Projekt J.E.N.O.V.A");
+				title->add_theme_font_size_override("font_size", SCALED(33));
+				title->set_text("Projekt J.E.N.O.V.A (RLTSE)");
 				jenova_about_ui->add_child(title);
 
 				// Add Version Label
@@ -3976,9 +3975,9 @@ namespace jenova
 				description->set_offset(Side::SIDE_BOTTOM, SCALED(450.0));
 				description->add_theme_color_override("font_color", Color(1, 1, 1, 0.53));
 				description->set_text(
-					"Projekt J.E.N.O.V.A is a series of components for the Godot 4 Game Engine "
-					"that brings fully-featured C++ scripting directly into the Godot Editor. "
-					"It allows the use of modern C++20 standards within the Godot Engine, similar to GDScript.\n\n"
+					"Projekt J.E.N.O.V.A is a series of components for the Redot Game Engine "
+					"that brings fully-featured C++ scripting directly into the Redot Editor. "
+					"It allows the use of modern C++20 standards within the Redot Engine, similar to GDScript.\n\n"
 					"With Projekt J.E.N.O.V.A, You can create anything!\nFrom Desktop Software to AAA Quality Games. \n"
 					"It's a full toolset with all the features C++ compilers provide.\n\n"
 					"For More Information Visit Official Website.\n"
@@ -6238,7 +6237,7 @@ namespace jenova
 	void RegisterDocumentationFromByteArray(const char* xmlDataPtr, size_t xmlDataSize)
 	{
 		std::string documentationData(xmlDataPtr, xmlDataSize);
-		::godot::gdextension_interface::editor_help_load_xml_from_utf8_chars_and_len(documentationData.data(), documentationData.size());
+		internal::gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len(documentationData.data(), documentationData.size());
 	}
 	void CopyStringToClipboard(const String& str)
 	{
@@ -7800,17 +7799,17 @@ namespace jenova
 		// Return Package List
 		return filteredCompilerPackages;
 	}
-	jenova::PackageList GetInstalledGodotKitPackages()
+	jenova::PackageList GetInstalledRedotKitPackages()
 	{
-		// Collect GodotKit Packages
-		auto godotKitPackages = JenovaPackageManager::get_singleton()->GetInstalledPackages(jenova::PackageType::GodotKit);
+		// Collect RedotKit Packages
+		auto RedotKitPackages = JenovaPackageManager::get_singleton()->GetInstalledPackages(jenova::PackageType::RedotKit);
 
 		// Sort Package Collections
-		std::sort(godotKitPackages.begin(), godotKitPackages.end(),
+		std::sort(RedotKitPackages.begin(), RedotKitPackages.end(),
 			[](const jenova::JenovaPackage& a, const jenova::JenovaPackage& b) { return a.pkgDestination < b.pkgDestination; });
 
 		// Return Package List
-		return godotKitPackages;
+		return RedotKitPackages;
 	}
 	jenova::InstalledAddons GetInstalledAddons()
 	{
@@ -7927,22 +7926,22 @@ namespace jenova
 		}
 		return "Missing-Compiler-1.0.0";
 	}
-	String GetInstalledGodotKitPathFromPackages(const String& godotKitIdentity)
+	String GetInstalledRedotKitPathFromPackages(const String& RedotKitIdentity)
 	{
-		auto godotKitPackages = jenova::GetInstalledGodotKitPackages();
-		if (godotKitPackages.size() > 0)
+		auto RedotKitPackages = jenova::GetInstalledRedotKitPackages();
+		if (RedotKitPackages.size() > 0)
 		{
-			if (godotKitIdentity.to_lower() == "latest") return godotKitPackages.back().pkgDestination;
-			for (const auto& godotKitPackage : godotKitPackages)
+			if (RedotKitIdentity.to_lower() == "latest") return RedotKitPackages.back().pkgDestination;
+			for (const auto& RedotKitPackage : RedotKitPackages)
 			{
-				if (godotKitPackage.pkgDestination.get_file() == godotKitIdentity) return godotKitPackage.pkgDestination;
+				if (RedotKitPackage.pkgDestination.get_file() == RedotKitIdentity) return RedotKitPackage.pkgDestination;
 			}
 		}
-		return "Missing-GodotKit-1.0.0";
+		return "Missing-RedotKit-1.0.0";
 	}
-	std::string SolveGodotKitPathForExporters(const String& godotKitPath)
+	std::string SolveRedotKitPathForExporters(const String& RedotKitPath)
 	{
-		String cleanedPath = godotKitPath.replace("res://", "");
+		String cleanedPath = RedotKitPath.replace("res://", "");
 		std::string pathStr = AS_STD_STRING(cleanedPath);
 		std::filesystem::path fsPath(pathStr);
 		if (fsPath.is_absolute()) return fsPath.string();
@@ -8203,7 +8202,7 @@ namespace jenova
 		{
 			jenova::ErrorMessage("Yo yo yo!",
 				"You just tried returning a fucking raw pointer from a script, bitch.\n"
-				"Godot ain't built for that shady stuff, man. It's gonna blow up in your face. "
+				"Redot ain't built for that shady stuff, man. It's gonna blow up in your face. "
 				"Wrap that thing in a Variant or use an IntPtr like a pro.\n"
 				"Otherwise? Boom. Game over. Science, yo."
 			);

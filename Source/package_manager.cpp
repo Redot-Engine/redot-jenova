@@ -70,7 +70,7 @@ static String GetPackageDatabasePath()
 }
 
 // Configuration
-constexpr const char* packageDatabaseFileURL = "/Jenova-Framework/Jenova-Packages/refs/heads/main/Jenova.Package.Database.json";
+constexpr const char* packageDatabaseFileURL = "/Redot-Engine/redot-jenova/refs/heads/main/Jenova.Package.Database.json";
 
 // Storages
 static jenova::PackageList onlinePackages;
@@ -244,8 +244,8 @@ bool JenovaPackageManager::OpenPackageManager(const String& packageDatabaseURL)
 	browser_tab->set_custom_minimum_size(Vector2(0, SCALED(40)));
 	browser_tab->add_tab("Compilers");
 	browser_tab->set_tab_tooltip(int32_t(jenova::PackageType::Compiler), "Compilers Available for Jenova Build System");
-	browser_tab->add_tab("Godot Kits");
-	browser_tab->set_tab_tooltip(int32_t(jenova::PackageType::GodotKit), "Godot Software Development Kits");
+	browser_tab->add_tab("Redot Kits");
+	browser_tab->set_tab_tooltip(int32_t(jenova::PackageType::RedotKit), "Redot Software Development Kits");
 	browser_tab->add_tab("Libraries");
 	browser_tab->set_tab_tooltip(int32_t(jenova::PackageType::Library), "Prepared Libraries for Jenova Framework");
 	browser_tab->add_tab("Sample Projects");
@@ -1299,7 +1299,7 @@ bool JenovaPackageManager::InstallCustomPackage(const jenova::CustomPackageInsta
 
 		OptionButton* pkgTypeButton = memnew(OptionButton);
 		pkgTypeButton->add_item("Compiler");
-		pkgTypeButton->add_item("GodotKit");
+		pkgTypeButton->add_item("RedotKit");
 		pkgTypeButton->add_item("Library");
 		pkgTypeButton->add_item("SampleProject");
 		pkgTypeButton->add_item("CodeTemplate");

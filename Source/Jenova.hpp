@@ -26,7 +26,7 @@
 #define APP_VERSION_SINGLECHAR			"b"
 #define APP_VERSION_DATA				0, 3, 9, 0
 #define APP_VERSION_BUILD				"0"
-#define APP_VERSION_NAME				"Halo"
+#define APP_VERSION_NAME				"Redot Edition"
 
 #ifndef NO_JENOVA_RUNTIME_SDK
 
@@ -506,7 +506,7 @@ namespace jenova
 	enum class PackageType
 	{
 		Compiler,
-		GodotKit,
+		RedotKit,
 		Library,
 		SampleProject,
 		CodeTemplate,
@@ -877,7 +877,7 @@ namespace jenova
 		constexpr char* UseMonospaceFontForTerminalConfigPath          = "jenova/use_monospace_font_for_terminal";
 		constexpr char* TerminalDefaultFontSizeConfigPath              = "jenova/terminal_default_font_size";
 		constexpr char* CompilerPackageConfigPath                      = "jenova/compiler_package";
-		constexpr char* GodotKitPackageConfigPath                      = "jenova/godot_kit_package";
+		constexpr char* RedotKitPackageConfigPath                      = "jenova/godot_kit_package";
 		constexpr char* ManagedSafeExecutionConfigPath                 = "jenova/managed_safe_execution";
 		constexpr char* UseBuiltinSDKConfigPath                        = "jenova/use_builtin_jenova_sdk";
 		constexpr char* RefreshTreeAfterBuildConfigPath                = "jenova/refresh_scene_tree_after_build";
@@ -1021,12 +1021,12 @@ namespace jenova
 	jenova::PackageList GetInstalledAddonPackages();
 	jenova::PackageList GetInstalledToolPackages();
 	jenova::PackageList GetInstalledCompilerPackages(const jenova::CompilerModel& compilerModel);
-	jenova::PackageList GetInstalledGodotKitPackages();
+	jenova::PackageList GetInstalledRedotKitPackages();
 	jenova::InstalledAddons GetInstalledAddons();
 	jenova::InstalledTools GetInstalledTools();
 	String GetInstalledCompilerPathFromPackages(const String& compilerIdentity, const jenova::CompilerModel& compilerModel);
-	String GetInstalledGodotKitPathFromPackages(const String& godotKitIdentity);
-	std::string SolveGodotKitPathForExporters(const String& godotKitPath);
+	String GetInstalledRedotKitPathFromPackages(const String& RedotKitIdentity);
+	std::string SolveRedotKitPathForExporters(const String& RedotKitPath);
 	std::string ResolveVariantValueAsString(const Variant* variantValue, const std::string& variantType, jenova::PointerList& ptrList);
 	std::string ResolveVariantTypeAsString(const Variant* variantValue);
 	std::string ResolveReturnTypeForJIT(const std::string& returnType);

@@ -59,7 +59,7 @@ PackedStringArray CPPScriptLanguage::_get_reserved_words() const
 		"reflexpr", "register", "reinterpret_cast", "requires", "return", "short", "signed", "sizeof", "static",
 		"static_assert", "static_cast", "struct", "switch", "synchronized", "template", "this", "thread_local",
 		"throw", "true", "try", "typedef", "typeid","typename", "union", "unsigned", "using", "virtual", "void",
-		"volatile", "wchar_t", "while", "xor", "xor_eq", "jenova", "godot", "__int64", "__int32", "Caller", "Variant",
+		"volatile", "wchar_t", "while", "xor", "xor_eq", "jenova", "godot", "redot", "__int64", "__int32", "Caller", "Variant",
 		"include", "ifdef", "else", "endif", "pragma",
 		"GlobalGet", "GlobalSet", "GlobalPointer", "GlobalVariable", "GetNode", "FindNode", "GetSelf",
 		jenova::GlobalSettings::ScriptToolIdentifier,
@@ -79,7 +79,7 @@ bool CPPScriptLanguage::_is_control_flow_keyword(const String& p_keyword) const
 {
 	static const std::unordered_set<std::string> control_flow_keywords{
 		"if", "else", "switch", "case", "default", "while", "do", "for", "break", "continue", "return", "goto", "try", "catch", "throw", "co_await",
-		"co_return", "co_yield", "jenova", "godot", "include", "ifdef", "else", "endif", "pragma",
+		"co_return", "co_yield", "jenova", "godot", "redot", "include", "ifdef", "else", "endif", "pragma",
 		jenova::GlobalSettings::ScriptToolIdentifier,
 		jenova::GlobalSettings::ScriptBlockBeginIdentifier,
 		jenova::GlobalSettings::ScriptBlockEndIdentifier,
