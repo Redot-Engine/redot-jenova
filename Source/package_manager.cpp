@@ -70,7 +70,7 @@ static String GetPackageDatabasePath()
 }
 
 // Configuration
-constexpr const char* packageDatabaseFileURL = "/Redot-Engine/redot-jenova/refs/heads/main/Jenova.Package.Database.json";
+constexpr const char* packageDatabaseFileURL = "/Redot-Engine/redot-jenova/refs/heads/master/Jenova.Package.Database.json";
 
 // Storages
 static jenova::PackageList onlinePackages;
