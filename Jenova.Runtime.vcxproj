@@ -44,11 +44,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;JENOVA_RUNTIME;JENOVA_SDK_BUILD;JENOVA_STATIC_BUILD_DISABLED;LITHIUM_EDITION_DISABLED;TYPED_METHOD_BIND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;JENOVA_RUNTIME;JENOVA_SDK_BUILD;JENOVA_STATIC_BUILD_DISABLED;JENOVA_PROTECTED_MODE_DISABLED;LITHIUM_EDITION_DISABLED;TYPED_METHOD_BIND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>.\Libs;.\Libs\GodotSDK\;.\Libs\GodotSDK\godot_cpp;.\Libs\LithiumSDK;.\Libs\LithiumSDK\lithium_cpp;.\Libs\Archive;.\Libs\Curl;.\Libs\Threading;.\Source</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Libs;.\Libs\RedotSDK\;.\Libs\RedotSDK\godot_cpp;.\Libs\LithiumSDK;.\Libs\LithiumSDK\lithium_cpp;.\Libs\Archive;.\Libs\Curl;.\Libs\Threading;.\Source</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OpenMPSupport>true</OpenMPSupport>
@@ -60,7 +60,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>.\Libs\libgodotcpp-static-x86_64.lib;.\Libs\libasmjit-static-x86_64.lib;.\Libs\libzlib-static-x86_64.lib;.\Libs\liblzma-static-x86_64.lib;.\Libs\libarchive-static-x86_64.lib;.\Libs\libcurl-static-x86_64.lib;.\Libs\libtcc-static-x86_64.lib;.\Libs\libpthread-static-x86_64.lib;.\Libs\libxml2-static-x86_64.lib;comctl32.lib;Dbghelp.lib;Ws2_32.lib;Wldap32.lib;Crypt32.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\Libs\libredotcpp-static-x86_64.lib;.\Libs\libasmjit-static-x86_64.lib;.\Libs\libzlib-static-x86_64.lib;.\Libs\liblzma-static-x86_64.lib;.\Libs\libarchive-static-x86_64.lib;.\Libs\libcurl-static-x86_64.lib;.\Libs\libtcc-static-x86_64.lib;.\Libs\libpthread-static-x86_64.lib;.\Libs\libxml2-static-x86_64.lib;comctl32.lib;Dbghelp.lib;Ws2_32.lib;Wldap32.lib;Crypt32.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <DelayLoadDLLs>dbghelp.dll;Wldap32.dll;bcrypt.dll;Crypt32.lib</DelayLoadDLLs>
       <TreatLinkerWarningAsErrors>
       </TreatLinkerWarningAsErrors>
@@ -68,7 +68,7 @@
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(BuildPath)JenovaSDK"
-xcopy "$(ProjectDir)\Source\JenovaSDK.h" "$(BuildPath)JenovaSDK" /Y
+xcopy "$(ProjectDir)Source\JenovaSDK.h" "$(BuildPath)JenovaSDK" /Y
 xcopy ".\Jenova.Runtime.gdextension" "$(BuildPath)" /Y
 xcopy "$(TargetDir)$(TargetName).lib" "$(BuildPath)JenovaSDK" /Y
 if exist "$(BuildPath)JenovaSDK\Jenova.SDK.x64.lib" del "$(BuildPath)JenovaSDK\Jenova.SDK.x64.lib"
@@ -88,6 +88,7 @@ ren "$(BuildPath)JenovaSDK\$(TargetName).lib" "Jenova.SDK.x64.lib"
   <ItemGroup>
     <ClCompile Include="Source\asset_monitor.cpp" />
     <ClCompile Include="Source\clektron.cpp" />
+    <ClCompile Include="Source\console.cpp" />
     <ClCompile Include="Source\gdextension_exporter.cpp" />
     <ClCompile Include="Source\jenova.cpp" />
     <ClCompile Include="Source\jenovaSDK.cpp" />
@@ -109,19 +110,18 @@ ren "$(BuildPath)JenovaSDK\$(TargetName).lib" "Jenova.SDK.x64.lib"
     <ClInclude Include="Source\AboutImage.h" />
     <ClInclude Include="Source\asset_monitor.h" />
     <ClInclude Include="Source\clektron.h" />
+    <ClInclude Include="Source\console.h" />
     <ClInclude Include="Source\ExtensionHosts.h" />
     <ClInclude Include="Source\gdextension_exporter.h" />
     <ClInclude Include="Source\InternalModules.h" />
     <ClInclude Include="Source\InternalSources.h" />
-    <ClInclude Include="Source\BuiltinFonts.h" />
+    <ClInclude Include="Source\FontDatabase.h" />
     <ClInclude Include="Source\CodeTemplates.h" />
     <ClInclude Include="Source\script_profiler.h" />
     <ClInclude Include="Source\task_system.h" />
-    <ClInclude Include="Source\TypesIcons.h" />
     <ClInclude Include="Source\Documentation.h" />
     <ClInclude Include="Source\IconDatabase.h" />
     <ClInclude Include="Source\Jenova.hpp" />
-    <ClInclude Include="Source\JenovaIcon64.h" />
     <ClInclude Include="Source\JenovaSDK.h" />
     <ClInclude Include="Source\package_manager.h" />
     <ClInclude Include="Source\script_compiler.h" />

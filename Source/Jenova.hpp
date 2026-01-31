@@ -12,7 +12,7 @@
 |                                                              |
 +-------------------------------------------------------------*/
 
-// Jenova SDK
+// Jenova Runtime SDK
 #pragma once
 
 // String Resources
@@ -24,7 +24,7 @@
 #define APP_VERSION_MIDDLEFIX			" "
 #define APP_VERSION_POSTFIX				"Beta"
 #define APP_VERSION_SINGLECHAR			"b"
-#define APP_VERSION_DATA				0, 3, 9, 0
+#define APP_VERSION_DATA				0, 3, 9, 3
 #define APP_VERSION_BUILD				"0"
 #define APP_VERSION_NAME				"Redot Edition"
 
@@ -136,11 +136,14 @@
 #include <classes/time.hpp>
 #include <classes/timer.hpp>
 #include <classes/shader.hpp>
+#include <classes/material.hpp>
+#include <classes/shader_material.hpp>
 #include <classes/font.hpp>
 #include <classes/font_file.hpp>
 #include <classes/font_variation.hpp>
 #include <classes/resource_importer_dynamic_font.hpp>
 #include <classes/input.hpp>
+#include <classes/input_map.hpp>
 #include <classes/input_event.hpp>
 #include <classes/input_event_mouse.hpp>
 #include <classes/input_event_key.hpp>
@@ -176,13 +179,15 @@
 #include <classes/box_container.hpp>
 #include <classes/h_box_container.hpp>
 #include <classes/v_box_container.hpp>
+#include <classes/margin_container.hpp>
+#include <classes/scroll_container.hpp>
+#include <classes/foldable_container.hpp>
 #include <classes/separator.hpp>
 #include <classes/h_separator.hpp>
 #include <classes/v_separator.hpp>
-#include <classes/margin_container.hpp>
-#include <classes/scroll_container.hpp>
 #include <classes/style_box.hpp>
 #include <classes/style_box_empty.hpp>
+#include <classes/style_box_flat.hpp>
 #include <classes/panel.hpp>
 #include <classes/viewport.hpp>
 #include <classes/viewport_texture.hpp>
@@ -291,6 +296,7 @@ using namespace godot;
 #define FUNCTION_CHECK						jenova::Output("%s | %p", __FUNCSIG__, this);
 #define LINE_CHECK							jenova::Output("%d", __LINE__);
 #define LINE_CHECK_THIS						jenova::Output("%d | %p", __LINE__, this);
+#define HASH_CSTR(cstr)						jenova::GenerateHashFromString(cstr)
 #define AS_STD_STRING(gstr)					(*jenova::ConvertToStdString(gstr).str)
 #define AS_C_STRING(gstr)					((*jenova::ConvertToStdString(gstr).str).c_str())
 #define AS_STD_WSTRING(gstr)				(*jenova::ConvertToWideStdString(gstr).wstr)
@@ -300,8 +306,10 @@ using namespace godot;
 #define JENOVA_RESOURCE(key)				jenova::resources::key
 #define CODE_TEMPLATE(id)					String(std::string(jenova::templates::id, sizeof(jenova::templates::id)).c_str())
 #define VALIDATE_FUNCTION(func)				if (!func) { jenova::Output("System Failure : %d", __LINE__); jenova::ExitWithCode(__LINE__); }
-#define CREATE_SVG_MENU_ICON(buffer)		jenova::CreateMenuItemIconFromByteArray(BUFFER_PTR_SIZE_PARAM(buffer), jenova::ImageCreationFormat::SVG)
-#define CREATE_PNG_MENU_ICON(buffer)		jenova::CreateMenuItemIconFromByteArray(BUFFER_PTR_SIZE_PARAM(buffer), jenova::ImageCreationFormat::PNG)
+#define MAKE_IMAGE_FROM_BUFFER				jenova::CreateImageTextureFromByteArray
+#define MAKE_IMAGE_FROM_BUFFER_EX			jenova::CreateImageTextureFromByteArrayEx
+#define CREATE_SVG_MENU_ICON(buffer)		jenova::CreateMenuItemIconFromByteArray(BUFFER_PTR_SIZE_PARAM(buffer), jenova::ImageFormat::SVG)
+#define CREATE_PNG_MENU_ICON(buffer)		jenova::CreateMenuItemIconFromByteArray(BUFFER_PTR_SIZE_PARAM(buffer), jenova::ImageFormat::PNG)
 #define CREATE_GLOBAL_TEMPLATE(a,b,c)		JenovaTemplateManager::get_singleton()->RegisterNewGlobalScriptTemplate(a, CODE_TEMPLATE(b), c);
 #define CREATE_CLASS_TEMPLATE(a,b,c,d)		JenovaTemplateManager::get_singleton()->RegisterNewClassScriptTemplate(a, b, CODE_TEMPLATE(c), d);
 #define QUERY_ENGINE_MODE(mode)				(jenova::GlobalStorage::CurrentEngineMode == jenova::EngineMode::mode)
@@ -363,6 +371,8 @@ namespace jenova
 	typedef uint16_t TaskID;
 	typedef std::function<void()> TaskFunction;
 	typedef void(*VoidFunc_t)();
+	typedef std::chrono::steady_clock::time_point SteadyTimePoint;
+	typedef std::chrono::system_clock::time_point SystemTimePoint;
 	typedef struct { uint32_t LowDateTime, HighDateTime; } FileTime;
 	typedef struct SmartString { std::string* str; ~SmartString() { if (str) delete str; }} SmartString;
 	typedef struct SmartWstring { std::wstring* wstr; ~SmartWstring() { if (wstr) delete wstr; }} SmartWstring;
@@ -400,7 +410,7 @@ namespace jenova
 		UnloadModuleToShutdown,
 		UnloadModuleManually
 	};
-	enum class ImageCreationFormat
+	enum class ImageFormat
 	{
 		PNG,
 		JPG,
@@ -553,6 +563,12 @@ namespace jenova
 		InstallFromPackageFile,
 		InstallFromPackageDirectory
 	};
+	enum class ProfilerSpanType : short
+	{
+		StageSpan						= 0x74,
+		ExecutionSpan					= 0x76,
+		Unknown							= 0x44,
+	};
 
 	// Flags
 	enum CompilerFeature : CompilerFeatures
@@ -632,9 +648,9 @@ namespace jenova
 	struct ScriptFileState
 	{
 		bool isValid = false;
-		FileTime creationTime;
-		FileTime accessTime;
-		FileTime writeTime;
+		FileTime creationTime = { 0 };
+		FileTime accessTime = { 0 };
+		FileTime writeTime = { 0 };
 	};
 	struct CompileResult
 	{
@@ -733,8 +749,8 @@ namespace jenova
 		std::string Library;
 		std::string Dependencies;
 		std::string Path;
-		bool Global;
-		bool AutoLoad;
+		bool Global = false;
+		bool AutoLoad = false;
 
 		// Serialized Data
 		SerializedData Data;
@@ -762,7 +778,9 @@ namespace jenova
 
 		constexpr bool VerboseEnabled							= false;
 		constexpr bool ScriptingEnabled							= true;
+		constexpr bool ConsoleEnabled							= true;
 		constexpr bool BuildInternalSources						= true;
+		constexpr bool BuiltinScriptsEnabled					= false;	// Feature is Deprecated
 		constexpr bool UpdateSelectionAfterBuild				= true;
 		constexpr bool SafeExitOnPluginUnload					= true;
 		constexpr bool HandlePreLaunchErrors					= true;
@@ -780,7 +798,7 @@ namespace jenova
 		constexpr bool UpdatePropertiesAfterCall				= true;
 		constexpr bool DisableBuildAndRunWhileDebug				= true;
 		constexpr bool PauseResumeTreeOnReload					= false;
-		constexpr bool UseLegacyJenovaCacheDirectory			= false;
+		constexpr bool UseLegacyJenovaCacheDirectory			= false;	// Feature is Deprecated
 		constexpr bool UseNewFileSystemFeatures					= true;
 		constexpr bool ForceJenovaSDKHeader						= true;
 		constexpr bool CacheRuntimeConfiguration				= true;
@@ -822,6 +840,7 @@ namespace jenova
 		constexpr char* VisualStudioProjectFile					= "Jenova.Module.vcxproj";
 		constexpr char* VisualStudioWatchdogFile				= "Jenova.VisualStudio.jwd";
 		constexpr char* JenovaTemporaryBootScriptFile			= "Jenova.Temporary.Boot.ctron";
+		constexpr char* JenovaProfilerReportDatabaseFile		= "Jenova.Profiler.DBCache.json";
 		constexpr char* JenovaPackageDatabaseURL				= "https://raw.githubusercontent.com";
 		constexpr char* JenovaReleaseMetadataURL				= "https://raw.githubusercontent.com";
 		constexpr char* JenovaPackageRepositoryPath				= "res://Jenova/Packages";
@@ -907,6 +926,7 @@ namespace jenova
 	void* RelocateMemory(void* dest, const void* src, std::size_t count);
 	bool FreeMemory(void* memoryPtr);
 	const char* CloneString(const char* str);
+	const wchar_t* CloneWideString(const wchar_t* wstr);
 	int GetEnvironmentEntity(const char* entityName, char* bufferPtr, size_t bufferSize);
 	bool SetEnvironmentEntity(const char* entityName, const char* entityValue);
 	bool AddEnvironmentPath(const char* path, const char* pathCollection);
@@ -920,7 +940,7 @@ namespace jenova
 	#pragma region JenovaUtilities
 	void Alert(const char* fmt, ...);
 	std::string Format(const char* fmt, ...);
-	std::string FormatSafe(const char* fmt, ...);
+	String Format(const String fmt, ...);
 	void Output(const char* fmt, ...);
 	void Output(const wchar_t* fmt, ...);
 	void OutputColored(const char* colorHash, const char* fmt, ...);
@@ -937,13 +957,17 @@ namespace jenova
 	String GenerateStandardUIDFromPath(const Resource* resourcePtr);
 	std::string GenerateRandomHashString();
 	std::string GenerateTerminalLogTime();
+	int GenerateHashFromString(const char* str);
+	Color GenerateColorVariation(Color initColor, int variationFactor);
 	jenova::EngineMode GetCurrentEngineInstanceMode();
 	bool IsEngineRuntimeExport();
 	String GetCurrentEngineInstanceModeAsString();
-	Ref<ImageTexture> CreateImageTextureFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageCreationFormat imageFormat = ImageCreationFormat::PNG);
-	Ref<ImageTexture> CreateImageTextureFromByteArrayEx(const uint8_t* imageDataPtr, size_t imageDataSize, const Vector2i& imageSize = Vector2i(), ImageCreationFormat imageFormat = ImageCreationFormat::PNG);
-	Ref<ImageTexture> CreateMenuItemIconFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageCreationFormat imageFormat = ImageCreationFormat::PNG);
+	Ref<ImageTexture> CreateImageTextureFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageFormat imageFormat = ImageFormat::SVG);
+	Ref<ImageTexture> CreateImageTextureFromByteArrayEx(const uint8_t* imageDataPtr, size_t imageDataSize, const Vector2i& imageSize = Vector2i(), ImageFormat imageFormat = ImageFormat::SVG);
+	Ref<ImageTexture> CreateMenuItemIconFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageFormat imageFormat = ImageFormat::SVG);
 	Ref<FontFile> CreateFontFileFromByteArray(const uint8_t* fontDataPtr, size_t fontDataSize);
+	Ref<Shader> CreateShaderFromString(const String& shaderCode);
+	Ref<ShaderMaterial> CreateShaderMaterialFromString(const String& shaderCode);
 	bool CollectResourcesFromFileSystem(const String& rootPath, const String& extensions, jenova::ResourceCollection& collectedResources, bool respectGDIgnore = true);
 	bool CollectScriptsFromFileSystemAndScenes(const String& rootPath, const String& extension, jenova::ResourceCollection& collectedResources, bool respectGDIgnore = true);
 	void RegisterDocumentationFromByteArray(const char* xmlDataPtr, size_t xmlDataSize);
@@ -953,6 +977,7 @@ namespace jenova
 	std::string GetStdStringFromClipboard();
 	ArgumentsArray CreateArgumentsArrayFromString(const std::string& str, char delimiter);
 	std::string GetExecutablePath();
+	std::string GetExecutableDirectory();
 	void ResetCurrentDirectoryToRoot();
 	void DoApplicationEvents();
 	bool QueueProjectBuild(bool deferred = true, bool restart = false);
@@ -996,6 +1021,7 @@ namespace jenova
 	ArgumentsArray SplitStdStringToArguments(const std::string& str, char delimiter = ';');
 	ScriptEntityContainer CreateScriptEntityContainer(const String& rootPath);
 	std::string GenerateFilterUniqueIdentifier(std::string& filterName, bool addBrackets = false);
+	std::string NormalizeBackslashes(const std::string& input);
 	std::string NormalizePath(const std::string& input);
 	std::string NormalizePathForEngine(const std::string& input);
 	bool CompareFilePaths(const std::string& sourcePath, const std::string& destinationPath);
@@ -1032,6 +1058,7 @@ namespace jenova
 	std::string ResolveReturnTypeForJIT(const std::string& returnType);
 	Variant* MakeVariantFromReturnType(Variant* variantPtr, const char* returnType);
 	uint32_t GetPropertyEnumFlagFromString(const std::string enumFlagStr);
+	String PreprocessScript(Ref<Resource> scriptResource, const Dictionary& preprocessorSettings, CompilerModel compilerModel);
 	jenova::SerializedData ProcessAndExtractPropertiesFromScript(OutParam std::string& scriptSource, const std::string& scriptUID);
 	jenova::SerializedData ProcessAndExtractPropertiesFromScript(OutParam String& scriptSource, const String& scriptUID);
 	Variant::Type GetVariantTypeFromStdString(const std::string& typeName);
@@ -1111,6 +1138,7 @@ namespace jenova
 
 // Jenova C Script Engine
 #include "clektron.h"
+#include "console.h"
 
 // Jenova Exporters
 #include "gdextension_exporter.h"

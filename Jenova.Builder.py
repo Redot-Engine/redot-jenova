@@ -1,5 +1,5 @@
 # Jenova Runtime Build System Script
-# Developed by Hamid.Memar (2024-2026)
+# Developed by Hamid.Memar (2024-present)
 # Usage : python3 ./Jenova.Builder.py --compiler win-msvc --skip-banner
 # Use python3 ./Jenova.Builder.py --help For More Information.
 
@@ -32,8 +32,8 @@ flags = [
 ]
 directories = [
     "Libs",
-    "Libs/GodotSDK",
-    "Libs/GodotSDK/godot_cpp",
+    "Libs/RedotSDK",
+    "Libs/RedotSDK/godot_cpp",
     "Libs/Archive",
     "Libs/Curl",
     "Source"
@@ -52,6 +52,7 @@ sources = [
     "Source/script_profiler.cpp",
     "Source/script_manager.cpp",
     "Source/clektron.cpp",
+    "Source/console.cpp",
     "Source/tiny_profiler.cpp",
     "Source/task_system.cpp",
     "Source/package_manager.cpp",
@@ -60,7 +61,7 @@ sources = [
 ]
 
 # Global Options
-builder_version     = "2.9"
+builder_version     = "3.0"
 deps_version        = "26.1"
 double_precision    = False
 static_build        = False
@@ -186,7 +187,7 @@ def generate_rdsdk(output_dir):
         os.rename(old_folder, new_folder)
 
     for ext in [".lib", ".a"]:
-        lib_name = f"libgodotcpp-static-x86_64{ext}"
+        lib_name = f"libredotcpp-static-x86_64{ext}"
         src_lib_path = os.path.join("./Libs", lib_name)
         if os.path.exists(src_lib_path):
             dst_lib_name = f"libGodot.x64{ext}"
@@ -498,10 +499,10 @@ def build_dependencies_linux(buildMode, cacheDir):
         shutil.copyfile(buildPath + "/liblibtcc.a", "./Libs/libtcc-static-x86_64.a")
         rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'TinyCC' Compiled Successfully.")
 
-    # Build GodotSDK
-    if not os.path.exists("./Libs/libgodotcpp-static-x86_64.a"):
+    # Build RedotSDK
+    if not os.path.exists("./Libs/libredotcpp-static-x86_64.a"):
         buildPath = cacheDir + "/Dependencies/godotcpp"
-        sdkPath = "./Libs/GodotSDK"
+        sdkPath = "./Libs/RedotSDK"
         if os.path.exists(buildPath): shutil.rmtree(buildPath)
         subprocess.run([
             "cmake",
@@ -516,13 +517,13 @@ def build_dependencies_linux(buildMode, cacheDir):
         ], check=True)
         build_with_ninja(buildPath)
         binary_path = buildPath + f"/bin/libgodot-cpp.linux.editor{'.double' if double_precision else ''}.x86_64.a"
-        shutil.copyfile(binary_path, "./Libs/libgodotcpp-static-x86_64.a")
+        shutil.copyfile(binary_path, "./Libs/libredotcpp-static-x86_64.a")
         if os.path.exists(sdkPath): shutil.rmtree(sdkPath)
         os.makedirs(sdkPath, exist_ok=True)
         shutil.copytree("./Dependencies/libredot/include", sdkPath, dirs_exist_ok=True)
         shutil.copyfile("./Dependencies/libredot/gdextension/gdextension_interface.h", sdkPath + "/gdextension_interface.h")
         shutil.copytree(buildPath + "/gen/include", sdkPath, dirs_exist_ok=True)
-        rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'GodotSDK' Compiled Successfully.")
+        rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'RedotSDK' Compiled Successfully.")
 def build_linux(compilerBinary, linkerBinary, buildMode, buildSystem):
 
     # Verbose Build
@@ -532,7 +533,7 @@ def build_linux(compilerBinary, linkerBinary, buildMode, buildSystem):
     libs = [
         "Libs/libzlib-static-x86_64.a",
         "Libs/libtcc-static-x86_64.a",
-        "Libs/libgodotcpp-static-x86_64.a",
+        "Libs/libredotcpp-static-x86_64.a",
         "Libs/libcurl-static-x86_64.a",
         "Libs/libasmjit-static-x86_64.a",
         "Libs/libarchive-static-x86_64.a",
@@ -904,11 +905,11 @@ def build_dependencies_windows(buildMode, cacheDir):
             shutil.copyfile(buildPath + "/libtcc.lib", "./Libs/libtcc-static-x86_64.lib")
             rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'TinyCC' Compiled Successfully.")
      
-        # Build GodotSDK
-        if not os.path.exists("./Libs/libgodotcpp-static-x86_64.lib"):
+        # Build RedotSDK
+        if not os.path.exists("./Libs/libredotcpp-static-x86_64.lib"):
             os.environ["GODOT_MSVC_STATIC_RUNTIME"] = "true"
             buildPath = cacheDir + "/Dependencies/godotcpp"
-            sdkPath = "./Libs/GodotSDK"
+            sdkPath = "./Libs/RedotSDK"
             if os.path.exists(buildPath): shutil.rmtree(buildPath)
             subprocess.run([
                 "cmake.exe",
@@ -925,13 +926,13 @@ def build_dependencies_windows(buildMode, cacheDir):
             ], check=True)
             build_with_ninja(buildPath)
             binary_path = buildPath + f"/bin/libgodot-cpp.windows.editor{'.double' if double_precision else ''}.x86_64.lib"
-            shutil.copyfile(binary_path, "./Libs/libgodotcpp-static-x86_64.lib")
+            shutil.copyfile(binary_path, "./Libs/libredotcpp-static-x86_64.lib")
             if os.path.exists(sdkPath): shutil.rmtree(sdkPath)
             os.makedirs(sdkPath, exist_ok=True)
             shutil.copytree("./Dependencies/libredot/include", sdkPath, dirs_exist_ok=True)
             shutil.copyfile("./Dependencies/libredot/gdextension/gdextension_interface.h", sdkPath + "/gdextension_interface.h")
             shutil.copytree(buildPath + "/gen/include", sdkPath, dirs_exist_ok=True)
-            rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'GodotSDK' Compiled Successfully.")
+            rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'RedotSDK' Compiled Successfully.")
 
     # Build Dependencies for Clang & GNU
     if buildMode == "win-clang" or buildMode == "win-gcc":
@@ -1092,10 +1093,10 @@ def build_dependencies_windows(buildMode, cacheDir):
             shutil.copyfile(os.path.join(buildPath, "libtcc.a"), "./Libs/libtcc-static-x86_64.a")
             rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'TinyCC' Compiled Successfully.")
 
-        # Build GodotSDK
-        if not os.path.exists("./Libs/libgodotcpp-static-x86_64.a"):
+        # Build RedotSDK
+        if not os.path.exists("./Libs/libredotcpp-static-x86_64.a"):
             buildPath = cacheDir + "/Dependencies/godotcpp"
-            sdkPath = "./Libs/GodotSDK"
+            sdkPath = "./Libs/RedotSDK"
             if os.path.exists(buildPath): shutil.rmtree(buildPath)
             subprocess.run([
                 "cmake.exe",
@@ -1110,13 +1111,13 @@ def build_dependencies_windows(buildMode, cacheDir):
             ], check=True)
             build_with_ninja(buildPath)
             binary_path = buildPath + f"/bin/libgodot-cpp.windows.editor{'.double' if double_precision else ''}.x86_64.a"
-            shutil.copyfile(binary_path, "./Libs/libgodotcpp-static-x86_64.a")
+            shutil.copyfile(binary_path, "./Libs/libredotcpp-static-x86_64.a")
             if os.path.exists(sdkPath): shutil.rmtree(sdkPath)
             os.makedirs(sdkPath, exist_ok=True)
             shutil.copytree("./Dependencies/libredot/include", sdkPath, dirs_exist_ok=True)
             shutil.copyfile("./Dependencies/libredot/gdextension/gdextension_interface.h", sdkPath + "/gdextension_interface.h")
             shutil.copytree(buildPath + "/gen/include", sdkPath, dirs_exist_ok=True)
-            rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'GodotSDK' Compiled Successfully.")
+            rgb_print("#38f227", "[ √ ] Jenova Runtime Dependency 'RedotSDK' Compiled Successfully.")
 def build_windows(compilerBinary, linkerBinary, buildMode, buildSystem):
 
     # Verbose Build
@@ -1165,7 +1166,7 @@ def build_windows(compilerBinary, linkerBinary, buildMode, buildSystem):
 
         # Dependencies
         libs = [
-            "Libs/libgodotcpp-static-x86_64.lib",
+            "Libs/libredotcpp-static-x86_64.lib",
             "Libs/libasmjit-static-x86_64.lib",
             "Libs/libzlib-static-x86_64.lib",
             "Libs/liblzma-static-x86_64.lib",
@@ -1327,7 +1328,7 @@ def build_windows(compilerBinary, linkerBinary, buildMode, buildSystem):
         libs = [
             "Libs/libzlib-static-x86_64.a",
             "Libs/libtcc-static-x86_64.a",
-            "Libs/libgodotcpp-static-x86_64.a",
+            "Libs/libredotcpp-static-x86_64.a",
             "Libs/libcurl-static-x86_64.a",
             "Libs/libasmjit-static-x86_64.a",
             "Libs/liblzma-static-x86_64.a",

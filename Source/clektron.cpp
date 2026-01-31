@@ -31,7 +31,17 @@
 #define UnreferenceParameter(P) (void)(P)
 #define AddSymbol(symbol) tcc_add_symbol(tcc, #symbol, reinterpret_cast<const void*>(&ClektronSystem::API_##symbol))
 
+// Type Definitions
+struct BindingData
+{
+    void* symbolPointer = nullptr;
+    std::string symbolName;
+    std::string returnType;
+    std::vector<std::string> parameters;
+};
+
 // Stroage Units
+std::vector<BindingData> bindedSymbols;
 std::map<const char*, std::shared_ptr<std::fstream>> fileInstances;
 
 // Clektron Script Interface
@@ -61,8 +71,8 @@ extern "C" namespace ClektronSystem
     // Structures
     struct DownloaderMetadata
     {
-        void* downloaderInstance;
-        void* downloaderCallback;
+        void* downloaderInstance = nullptr;
+        void* downloaderCallback = nullptr;
         double downloadSpeed = 0;
     };
 
@@ -445,6 +455,10 @@ extern "C" namespace ClektronSystem
     // Downloader API
     bool API_DownloadToBuffer(CString fileURL, Buffer* outBuffer, Size* bufferSize, FunctionPtr downloadCallback)
     {
+        #ifdef JENOVA_PROTECTED_MODE
+            return false;
+        #endif 
+
         // Initialize CURL
         CURLcode res;
         curl_global_init(CURL_GLOBAL_ALL);
@@ -682,6 +696,9 @@ extern "C" namespace ClektronSystem
     }
     int API_System(CString command)
     {
+        #ifdef JENOVA_PROTECTED_MODE
+            return 0;
+        #endif
         return system(command);
     }
     CString API_GetFileMD5Hash(CString filePath)
@@ -711,14 +728,23 @@ extern "C" namespace ClektronSystem
     }
     Instance API_LoadModule(CString modulePath)
     {
+        #ifdef JENOVA_PROTECTED_MODE
+            return nullptr;
+        #endif
         return jenova::LoadModule(modulePath);
     }
     FunctionPtr API_GetModuleFunction(Instance moduleInstance, CString functionName)
     {
+        #ifdef JENOVA_PROTECTED_MODE
+            return nullptr;
+        #endif
         return jenova::GetModuleFunction(moduleInstance, functionName);
     }
     bool API_FreeModule(Instance moduleInstance)
     {
+        #ifdef JENOVA_PROTECTED_MODE
+            return false;
+        #endif
         return jenova::ReleaseModule(moduleInstance);
     }
     CString API_CombineStrings(CString strA, CString strB)
@@ -736,7 +762,7 @@ extern "C" namespace ClektronSystem
     }
 }
 
-// Jenova Clektron Syntax Highlighter
+// Clektron Syntax Highlighter
 class ClektronHighlighter : public CodeHighlighter
 {
     GDCLASS(ClektronHighlighter, CodeHighlighter);
@@ -745,23 +771,24 @@ protected:
     static void _bind_methods() {}
 
 public:
+    // Define Clektron Highlighter Colors
+    Color keyword_color             = Color::html("#86e051");
+    Color type_color                = Color::html("#66e051");
+    Color boolean_color             = Color::html("#4cb8e6");
+    Color enum_color                = Color::html("#8484f5");
+    Color enum_value_color          = Color::html("#9dbef5");
+    Color preprocessor_color        = Color::html("#fa5293");
+    Color string_color              = Color::html("#f53854");
+    Color char_color                = Color::html("#f5386e");
+    Color comment_color             = Color::html("#96969696");
+    Color function_color            = Color::html("#45ff92");
+    Color number_color              = Color::html("#e0b83f");
+    Color symbol_color              = Color::html("#f75c40");
+    Color memeber_variable_color    = Color::html("#4f49c9");
+
+public:
     ClektronHighlighter()
     {
-        // Define Clektron Highlighter Colors
-        Color keyword_color             = Color::html("#86e051");
-        Color type_color                = Color::html("#66e051");
-        Color boolean_color             = Color::html("#4cb8e6");
-        Color enum_color                = Color::html("#8484f5");
-        Color enum_value_color          = Color::html("#9dbef5");
-        Color preprocessor_color        = Color::html("#fa5293");
-        Color string_color              = Color::html("#f53854");
-        Color char_color                = Color::html("#f5386e");
-        Color comment_color             = Color::html("#96969696");
-        Color function_color            = Color::html("#45ff92");
-        Color number_color              = Color::html("#e0b83f");
-        Color symbol_color              = Color::html("#f75c40");
-        Color memeber_variable_color    = Color::html("#4f49c9");
-
         // Add Clektron Keywords
         const String keywords[] =
         {
@@ -809,6 +836,22 @@ public:
         set_symbol_color(symbol_color);
         set_member_variable_color(memeber_variable_color);
     }
+
+public:
+    void _clear_highlighting_cache() override
+    {
+        // Update Symbols Cache
+        for (const auto& bindedSymbol : bindedSymbols) UpdateFunctionSymbol(String(bindedSymbol.symbolName.c_str()));
+
+        // Call Base Function
+        CodeHighlighter::_clear_highlighting_cache();
+    }
+
+private:
+    void UpdateFunctionSymbol(const String& symbolName)
+    {
+        if (!this->has_keyword_color(symbolName)) this->add_keyword_color(symbolName, function_color);
+    }
 };
 
 // Singleton Instance
@@ -822,6 +865,9 @@ void Clektron::init()
 
     // Register Syntax Highlighter
     ClassDB::register_class<ClektronHighlighter>();
+
+    // Register Console
+    if (jenova::GlobalSettings::ConsoleEnabled) Console::init();
 
     // Initialize Singleton
     singleton = memnew(Clektron);
@@ -849,15 +895,9 @@ Clektron* Clektron::get_singleton()
     return singleton;
 }
 
-// Jenova Clektron Script Engine Implementation
-Clektron::Clektron()
-{
-
-}
-Clektron::~Clektron()
-{
-
-}
+// Clektron Script Engine Implementation
+Clektron::Clektron() {}
+Clektron::~Clektron() {}
 bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntrypoint)
 {
     // Validate Script Content
@@ -880,7 +920,14 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     {
         std::string errorMessage(msg);
         jenova::ReplaceAllMatchesWithString(errorMessage, "<string>:", "At Line ");
-        jenova::Error("Clektron Script Engine", ClektronSystem::InternalFormat("Clektron Compiler Encountered Error :\n%s", errorMessage.c_str()));
+        if (errorMessage.find("warning") != string::npos)
+        {
+            UtilityFunctions::push_warning(ClektronSystem::InternalFormat("Clektron Compiler Warning :\n%s", errorMessage.c_str()));
+        }
+        else
+        {
+            UtilityFunctions::push_error(ClektronSystem::InternalFormat("Clektron Compiler Encountered Error :\n%s", errorMessage.c_str()));
+        }
     };
     tcc_set_error_func(tcc, this, tcc_error_handler);
 
@@ -944,10 +991,16 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     AddSymbol(CombineStrings);
     AddSymbol(CompareStrings);
 
+    // Register Custom Bindings
+    for (const auto& binding : bindedSymbols)
+    {
+        tcc_add_symbol(tcc, binding.symbolName.c_str(), binding.symbolPointer);
+    }
+
     // Generate Final Script Code
     std::string ctronFinalScript = 
     R"(
-    /* Jenova Clektron Engine Developed By Hamid.Memar */
+    /* Jenova Clektron (Electron-C) Scripting Engine - Developed By Hamid.Memar */
 
     // Macros
     #define bool                int
@@ -957,7 +1010,7 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     #define Buffer              unsigned char*
     #define FunctionPtr         void*
     #define String              const char*
-    #define Size                int
+    #define Size                unsigned long long int
 
     // Enums
     typedef enum { Alert_Info, Alert_Warn, Alert_Error } AlertType;
@@ -1020,9 +1073,30 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     String CombineStrings(String strA, String strB);
     bool CompareStrings(String strA, String strB);
 
+    // Symbol Bindings
+    @@BINDINGS@@
+
     // Reset Line Number
     #line 1
     )";
+
+    // Generate Bindings
+    std::string bindingsCode = "";
+    for (const auto& binding : bindedSymbols)
+    {
+        std::string functionSignature = jenova::Format("%s %s(", binding.returnType.c_str(), binding.symbolName.c_str());
+        if (binding.parameters.size() != 0)
+        {
+            for (size_t i = 0; i < binding.parameters.size(); i++)
+            {
+                functionSignature += binding.parameters[i];
+                if (i != binding.parameters.size() - 1) functionSignature += ", ";
+            }
+        }
+        functionSignature += ");\n";
+        bindingsCode += functionSignature;
+    }
+    jenova::ReplaceAllMatchesWithString(ctronFinalScript, "@@BINDINGS@@", bindingsCode);
 
     // Add Entrypoint Start Automatically
     if (noEntrypoint)
@@ -1057,7 +1131,6 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     }
 
     // Get Compiled Caller Function
-    using ClektronMainFunction = bool*(*)();
     ClektronMainFunction ctronEntrypoint = (ClektronMainFunction)tcc_get_symbol(tcc, "ClektronMain");
     if (!ctronEntrypoint)
     {
@@ -1067,7 +1140,17 @@ bool Clektron::ExecuteScript(const std::string& ctronScriptContent, bool noEntry
     }
 
     // Execute Caller
-    bool result = ctronEntrypoint();
+    bool result = false;
+    if (!jenova::GlobalStorage::UseManagedSafeExecution || JenovaInterpreter::GetDebugModeExecutionState())
+    {
+        // Unsafe Execution
+        result = ctronEntrypoint();
+    }
+    else
+    {
+        // Safe Execution
+        result = SafeExecute(ctronEntrypoint);
+    }
 
     // Verbose If Failed
     if (!result) jenova::Warning("Clektron Script Engine", "Script Entrypoint Returned False.");
@@ -1089,4 +1172,52 @@ bool Clektron::ExecuteScriptFromFile(const std::string& ctronScriptFilePath, boo
 bool Clektron::ExecuteScriptFromFile(const godot::String& ctronScriptFilePath, bool noEntrypoint)
 {
     return this->ExecuteScriptFromFile(AS_STD_STRING(ctronScriptFilePath), noEntrypoint);
+}
+bool Clektron::BindSymbol(void* symbolPtr, const std::string& symbolName, const std::string& returnType, std::vector<std::string>& parameters)
+{
+    // Create Binding Data
+    BindingData bindingData;
+    bindingData.symbolPointer = symbolPtr;
+    bindingData.symbolName = symbolName;
+    bindingData.returnType = returnType;
+    bindingData.parameters = parameters;
+
+    // Validate Pointer
+    if (!bindingData.symbolPointer) return false;
+
+    // Check If It Already Exists
+    for (const auto& bindedSymbol : bindedSymbols)
+    {
+        if (bindedSymbol.symbolName == bindingData.symbolName) return false;
+    }
+
+    // Add Binding Data
+    bindedSymbols.push_back(bindingData);
+
+    // All Good
+    return true;
+}
+bool Clektron::BindSymbol(void* symbolPtr, const std::string& symbolName, const std::string& returnType, int parameterCount, ...)
+{
+    // Collect Parameters
+    va_list args;
+    va_start(args, parameterCount);
+    std::vector<std::string> parameters;
+    for (int i = 0; i < parameterCount; i++) parameters.push_back(va_arg(args, const char*));
+    va_end(args);
+
+    // Redirect
+    return this->BindSymbol(symbolPtr, symbolName, returnType, parameters);
+}
+bool Clektron::SafeExecute(ClektronMainFunction ctronEntrypoint)
+{
+    // Managed Safe Execution [Windows Only]
+	#if defined(TARGET_PLATFORM_WINDOWS) && defined(_MSC_VER)
+        bool executionResult = false;
+        __try { executionResult = ctronEntrypoint(); }
+        __except (jenova::JenovaExecutionCrashHandler(GetExceptionInformation())) { }
+        return executionResult;
+    #else
+		return ctronEntrypoint();
+	#endif
 }

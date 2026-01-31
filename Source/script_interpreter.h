@@ -42,7 +42,11 @@ public:
     static jenova::ScriptFunctionContainer GetFunctionContainer(const std::string& scriptUID);
     static jenova::ScriptPropertyContainer GetPropertyContainer(const std::string& scriptUID);
     static Variant CallFunction(const godot::Object* objectPtr, const std::string& functionName, std::string& scriptUID, const Variant** functionParameters, const int functionParametersCount);
+    static void SetExecutionPermission(bool executionState);
     static void SetExecutionState(bool executionState);
+    static bool IsExecutingFunction();
+    static void AbortExecution();
+    static std::string GenerateFunctionUniqueID(const std::string& scriptPath, const std::string& functionName);
     static Variant GenerateFunctionCallError(const std::string& functionName, const String& errorReason);
     static bool FlushPropertyStorage();
     static jenova::PropertyList GetPropertiesList(std::string& scriptUID);
@@ -54,6 +58,7 @@ public:
     static void SetInterpreterBackend(jenova::InterpreterBackend newBackend);
     static jenova::FunctionPointer SolveVirtualFunction(jenova::ModuleHandle moduleHandle, const char* functionName);
     static void SetDebugModeExecutionState(bool debugModeState);
+    static bool GetDebugModeExecutionState();
     static jenova::ModuleHandle LoadShellModule(const uint8_t* moduleDataPtr, const size_t moduleSize);
 
 public:
@@ -84,5 +89,4 @@ private:
     static inline jenova::InterpreterBackend    interpreterBackend      = jenova::InterpreterBackend::TinyCC;
     static inline jenova::PointerStorage        propertyStorage         = jenova::PointerStorage();
     static inline jenova::PropertySetMethod     propertySetMethod       = jenova::PropertySetMethod::DirectAssign;
-
 };

@@ -41,7 +41,7 @@ static String GetCallbackEventStringName(jenova::AssetMonitor::CallbackEvent cal
 // Global Storage
 Vector<filewatch::FileWatch<std::string>*> assetMonitors;
 Vector<jenova::AssetMonitor::AssetMonitorCallback> monitorCallbacks;
-std::unordered_map<std::string, std::chrono::system_clock::time_point> lastRead;
+std::unordered_map<std::string, jenova::SystemTimePoint> lastRead;
 
 // Singleton Instance
 JenovaAssetMonitor* jnvam_singleton = nullptr;
@@ -117,7 +117,7 @@ bool JenovaAssetMonitor::AddDirectory(const String& directoryPath)
 			return filepath;
 		};
 
-		// Somehow Paths On Linux Have a Hash At End Sometimes, Need to Be cleaned
+		// Somehow Paths On Linux Have a Hash At End Sometimes, Need to Be Cleaned
 		std::string solvedPath = path;
 		solvedPath = CleanPath(solvedPath);
 

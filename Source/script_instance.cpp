@@ -201,6 +201,13 @@ void CPPScriptInstance::notification(int p_notification, bool p_reversed)
 }
 Variant CPPScriptInstance::callp(const StringName &p_method, const Variant **p_args, const int p_argument_count, GDExtensionCallError &r_error) 
 {
+	// Validate Scripting Backend
+	if (!jenova::GlobalSettings::ScriptingEnabled)
+	{
+		r_error.error = GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL;
+		return Variant();
+	}
+
 	// Validate Instance & Script
 	if (isDeleting || !this->script.is_valid())
 	{
@@ -209,10 +216,13 @@ Variant CPPScriptInstance::callp(const StringName &p_method, const Variant **p_a
 	}
 
 	// Verbose Call
-	String script_name = this->script->get_path().get_file();
-	String owner_name = godot::Object::cast_to<godot::Node>(this->owner)->get_name();
-	jenova::VerboseByID(__LINE__, "Executing Script (%s | %s)[%s][%d] from (%s | %p) ...", 
-		AS_C_STRING(script_name), AS_C_STRING(scriptInstanceIdentity), AS_C_STRING(p_method), p_argument_count,AS_C_STRING(owner_name), this->instance);
+	if (jenova::GlobalStorage::DeveloperModeActivated)
+	{
+		String script_name = this->script->get_path().get_file();
+		String owner_name = godot::Object::cast_to<godot::Node>(this->owner)->get_name();
+		jenova::VerboseByID(__LINE__, "Executing Script (%s | %s)[%s][%d] from (%s | %p) ...",
+			AS_C_STRING(script_name), AS_C_STRING(scriptInstanceIdentity), AS_C_STRING(p_method), p_argument_count, AS_C_STRING(owner_name), this->instance);
+	}
 
 	// Handle Internal Methods
 	if (p_method == StringName("_get_editor_name"))
@@ -239,7 +249,7 @@ Variant CPPScriptInstance::callp(const StringName &p_method, const Variant **p_a
 	}
 
 	// Initial Update for Properties
-	if (p_method == StringName("_enter_world"))
+	if (p_method == StringName("_enter_tree"))
 	{
 		auto propContainer = JenovaInterpreter::GetPropertyContainer(AS_STD_STRING(this->scriptInstanceIdentity));
 		for (size_t i = 0; i < propContainer.scriptProperties.size(); i++)
@@ -256,11 +266,15 @@ Variant CPPScriptInstance::callp(const StringName &p_method, const Variant **p_a
 					this->instanceProperties[scriptProperty.propertyInfo.name] = scriptProperty.defaultValue;
 				}
 			}
+
+			// Set Initial Value of Property
+			Variant initialValue = this->instanceProperties[scriptProperty.propertyInfo.name];
+			JenovaInterpreter::SetPropertyValueFromVariant(scriptProperty.propertyInfo.name, initialValue, scriptInstanceIdentity);
 		}
 	}
 
 	// Update Interpreter Properties
-	if (this->instanceProperties.size() != 0)
+	if (this->instanceProperties.size() != 0 && !JenovaInterpreter::IsExecutingFunction())
 	{
 		Array instancePropertiesKeys = this->instanceProperties.keys();
 		for (size_t i = 0; i < instancePropertiesKeys.size(); i++)

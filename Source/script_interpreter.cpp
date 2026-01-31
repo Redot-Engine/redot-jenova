@@ -576,14 +576,19 @@ Variant JenovaInterpreter::CallFunction(const godot::Object* objectPtr, const st
                 Variant result = Variant::NIL;
                 if (JenovaProfiler::IsEnabled())
                 {
+                    if (!JenovaInterpreter::IsExecutingFunction()) JenovaProfiler::SetCurrentExecutionContext(scriptPath, functionName);
                     JenovaTinyProfiler::CreateCheckpoint("NitroJITExecution");
+                    SetExecutionState(true);
                     result = callerFunction();
+                    SetExecutionState(false);
                     double executionDuration = JenovaTinyProfiler::GetCheckpointTimeAndDispose("NitroJITExecution");
                     JenovaProfiler::AddExecutionRecord(scriptPath, functionName, executionDuration);
                 }
                 else
                 {
+                    SetExecutionState(true);
                     result = callerFunction();
+                    SetExecutionState(false);
                 }
 
                 // Release Generated Code When Done
@@ -599,7 +604,22 @@ Variant JenovaInterpreter::CallFunction(const godot::Object* objectPtr, const st
                 typedef void(*CallerFunction)();
                 CallerFunction callerFunction = nullptr;
                 jitRuntime.add(&callerFunction, &code);
-                callerFunction();
+                if (JenovaProfiler::IsEnabled())
+                {
+                    if (!JenovaInterpreter::IsExecutingFunction()) JenovaProfiler::SetCurrentExecutionContext(scriptPath, functionName);
+                    JenovaTinyProfiler::CreateCheckpoint(GenerateFunctionUniqueID(scriptPath, functionName));
+                    SetExecutionState(true);
+                    callerFunction();
+                    SetExecutionState(false);
+                    double executionDuration = JenovaTinyProfiler::GetCheckpointTimeAndDispose(GenerateFunctionUniqueID(scriptPath, functionName));
+                    JenovaProfiler::AddExecutionRecord(scriptPath, functionName, executionDuration);
+                }
+                else
+                {
+                    SetExecutionState(true);
+                    callerFunction();
+                    SetExecutionState(false);
+                }
                 jitRuntime.release(callerFunction);
                 return Variant(true);
             }
@@ -705,14 +725,19 @@ Variant JenovaInterpreter::CallFunction(const godot::Object* objectPtr, const st
         Variant* result = nullptr;
         if (JenovaProfiler::IsEnabled())
         {
-            JenovaTinyProfiler::CreateCheckpoint("MeteoraExecution");
+            if (!JenovaInterpreter::IsExecutingFunction()) JenovaProfiler::SetCurrentExecutionContext(scriptPath, functionName);
+            JenovaTinyProfiler::CreateCheckpoint(GenerateFunctionUniqueID(scriptPath, functionName));
+            SetExecutionState(true);
             result = interpreterCaller();
-            double executionDuration = JenovaTinyProfiler::GetCheckpointTimeAndDispose("MeteoraExecution");
+            SetExecutionState(false);
+            double executionDuration = JenovaTinyProfiler::GetCheckpointTimeAndDispose(GenerateFunctionUniqueID(scriptPath, functionName));
             JenovaProfiler::AddExecutionRecord(scriptPath, functionName, executionDuration);
         }
         else
         {
+            SetExecutionState(true);
             result = interpreterCaller();
+            SetExecutionState(false);
         }
 
         // Release Allocated Values
@@ -742,10 +767,27 @@ Variant JenovaInterpreter::CallFunction(const godot::Object* objectPtr, const st
     // No Valid Backend
     return GenerateFunctionCallError(functionName, "ERROR::INVALID_INTERPRETER_BACKEND");
 }
+void JenovaInterpreter::SetExecutionPermission(bool executionPermission)
+{
+    // Set Execution Permission
+    allowExecution = executionPermission;
+}
 void JenovaInterpreter::SetExecutionState(bool executionState)
 {
     // Set Execution State
-    allowExecution = executionState;
+    isExecuting = executionState;
+}
+bool JenovaInterpreter::IsExecutingFunction()
+{
+    return isExecuting;
+}
+void JenovaInterpreter::AbortExecution()
+{
+    SetExecutionState(false);
+}
+std::string JenovaInterpreter::GenerateFunctionUniqueID(const std::string& scriptPath, const std::string& functionName)
+{
+    return scriptPath + "__" + functionName;
 }
 Variant JenovaInterpreter::GenerateFunctionCallError(const std::string& functionName, const String& errorReason)
 {
@@ -888,7 +930,15 @@ jenova::FunctionPointer JenovaInterpreter::SolveVirtualFunction(jenova::ModuleHa
 }
 void JenovaInterpreter::SetDebugModeExecutionState(bool debugModeState)
 {
-    executeInDebugMode = debugModeState;
+    #ifndef JENOVA_PROTECTED_MODE
+        executeInDebugMode = debugModeState;
+    #else
+        executeInDebugMode = false;
+    #endif
+}
+bool JenovaInterpreter::GetDebugModeExecutionState()
+{
+    return executeInDebugMode;
 }
 jenova::ModuleHandle JenovaInterpreter::LoadShellModule(const uint8_t* moduleDataPtr, const size_t moduleSize)
 {

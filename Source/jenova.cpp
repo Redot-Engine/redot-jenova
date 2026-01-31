@@ -17,10 +17,8 @@
 
 // Resources
 #include "IconDatabase.h"
-#include "BuiltinFonts.h"
+#include "FontDatabase.h"
 #include "Documentation.h"
-#include "JenovaIcon64.h"
-#include "TypesIcons.h"
 #include "AboutImage.h"
 
 // Internal/Built-In Sources
@@ -177,7 +175,7 @@ namespace jenova
 			{ 
 				Vector2i iconSize(20, 20);
 				iconSize *= EditorInterface::get_singleton()->get_editor_scale();
-				return jenova::CreateImageTextureFromByteArrayEx(BUFFER_PTR_SIZE_PARAM(jenova::resources::PNG_JENOVA_ICON_64), iconSize);
+				return MAKE_IMAGE_FROM_BUFFER_EX(BUFFER_PTR_SIZE_PARAM(jenova::resources::PNG_JENOVA_ICON_64), iconSize, jenova::ImageFormat::PNG);
 			}
 			bool _has_main_screen() const override { return false; }
 			bool _handles(Object* p_object) const override { return false; }
@@ -267,13 +265,12 @@ namespace jenova
 			}
 
 			// Input Events
-			void _unhandled_key_input(const Ref<InputEvent>& p_event) override
+			void _unhandled_key_input(const Ref<InputEvent>& inputEvent) override
 			{
-				// Can Also Use : if (Input::get_singleton()->is_key_pressed(KEY_ALT))
-				Ref<InputEventKey> key_event = p_event;
-				if (key_event.is_valid())
+				Ref<InputEventKey> keyEvent = inputEvent;
+				if (keyEvent.is_valid())
 				{
-					if (key_event->is_pressed() && key_event->get_keycode() == KEY_ALT)
+					if (keyEvent->is_pressed() && keyEvent->get_keycode() == KEY_ALT)
 					{
 						if (buildToolButton)
 						{
@@ -281,7 +278,7 @@ namespace jenova
 							buildToolButton->set_button_icon(jenova::GetEditorIcon("Clear"));
 						}
 					}
-					else if (!key_event->is_pressed() && key_event->get_keycode() == KEY_ALT)
+					else if (!keyEvent->is_pressed() && keyEvent->get_keycode() == KEY_ALT)
 					{
 						if (buildToolButton)
 						{
@@ -756,7 +753,7 @@ namespace jenova
 				// Register Runtime Class Icon
 				if (!editor_theme->has_icon("JenovaRuntime", "EditorIcons"))
 				{
-					Ref<ImageTexture> iconImage = jenova::CreateImageTextureFromByteArray(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(PNG_JENOVA_ICON_64)));
+					Ref<ImageTexture> iconImage = MAKE_IMAGE_FROM_BUFFER(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(PNG_JENOVA_ICON_64)), jenova::ImageFormat::PNG);
 					if (iconImage.is_valid())
 					{
 						editor_theme->set_icon("JenovaRuntime", "EditorIcons", iconImage);
@@ -768,14 +765,13 @@ namespace jenova
 					}
 				}
 
-				// Register C++ Script Icon
+				// Register Scripting Backend Icons
 				if (jenova::GlobalSettings::ScriptingEnabled)
 				{
+					// Register C++ Script Icon
 					if (!editor_theme->has_icon(jenova::GlobalSettings::JenovaScriptType, "EditorIcons"))
 					{
-						Ref<ImageTexture> iconImage =
-							jenova::CreateImageTextureFromByteArrayEx(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CPP_SCRIPT_ICON),
-							Vector2i(SCALED(19), SCALED(18)), jenova::ImageCreationFormat::SVG);
+						Ref<ImageTexture> iconImage = MAKE_IMAGE_FROM_BUFFER_EX(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CPP_SCRIPT_ICON), Vector2i(SCALED(19), SCALED(18)));
 
 						if (iconImage != nullptr)
 						{
@@ -787,16 +783,11 @@ namespace jenova
 							return false;
 						}
 					}
-				}
 
-				// Register C++ Header Icon
-				if (jenova::GlobalSettings::ScriptingEnabled)
-				{
+					// Register C++ Header Icon
 					if (!editor_theme->has_icon(jenova::GlobalSettings::JenovaHeaderType, "EditorIcons"))
 					{
-						Ref<ImageTexture> iconImage =  
-							jenova::CreateImageTextureFromByteArrayEx(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CPP_HEADER_ICON), 
-							Vector2i(SCALED(18), SCALED(18)), jenova::ImageCreationFormat::SVG);
+						Ref<ImageTexture> iconImage = MAKE_IMAGE_FROM_BUFFER_EX(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CPP_HEADER_ICON), Vector2i(SCALED(18), SCALED(18)));
 
 						if (iconImage != nullptr)
 						{
@@ -810,6 +801,42 @@ namespace jenova
 					}
 				}
 
+				// Register Clektron Console Icons
+				if (jenova::GlobalSettings::ConsoleEnabled)
+				{
+					// Register Console Icon
+					if (!editor_theme->has_icon("Console", "EditorIcons"))
+					{
+						Ref<ImageTexture> iconImage = MAKE_IMAGE_FROM_BUFFER_EX(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CONSOLE_ICON), Vector2i(SCALED(18), SCALED(18)));
+
+						if (iconImage != nullptr)
+						{
+							editor_theme->set_icon("Console", "EditorIcons", iconImage);
+						}
+						else
+						{
+							jenova::Error("Jenova Plugin", "Cannot Load Console Icon.");
+							return false;
+						}
+					}
+
+					// Register Console Scheme Icon
+					if (!editor_theme->has_icon("ConsoleScheme", "EditorIcons"))
+					{
+						Ref<ImageTexture> iconImage = MAKE_IMAGE_FROM_BUFFER_EX(BUFFER_PTR_SIZE_PARAM(jenova::resources::SVG_CONSOLE_SCHEME_ICON), Vector2i(SCALED(18), SCALED(18)));
+
+						if (iconImage != nullptr)
+						{
+							editor_theme->set_icon("ConsoleScheme", "EditorIcons", iconImage);
+						}
+						else
+						{
+							jenova::Error("Jenova Plugin", "Cannot Load Console Icon.");
+							return false;
+						}
+					}
+				}
+
 				// All Good
 				return true;
 			}
@@ -817,6 +844,7 @@ namespace jenova
 			{
 				// Register Nodes Documentation
 				jenova::RegisterDocumentationFromByteArray(BUFFER_PTR_SIZE_PARAM(jenova::documentation::JenovaRuntimeXML));
+				jenova::RegisterDocumentationFromByteArray(BUFFER_PTR_SIZE_PARAM(jenova::documentation::ConsoleXML));
 
 				// Register Scripts Documentation
 				jenova::UpdateScriptsDocumentation();
@@ -1111,7 +1139,7 @@ namespace jenova
 				if (jenovaTerminal)
 				{
 					// Remove Terminal from Bottom Panel
-					this->remove_control_from_bottom_panel(jenovaTerminal);
+					if (isTerminalVisible) this->remove_control_from_bottom_panel(jenovaTerminal);
 
 					// Update Flags
 					isTerminalVisible = false;
@@ -1446,7 +1474,7 @@ namespace jenova
 				}
 
 				// Stop Interpreter Execution
-				JenovaInterpreter::SetExecutionState(false);
+				JenovaInterpreter::SetExecutionPermission(false);
 
 				// Update Settings
 				if (!UpdateStorageConfigurations())
@@ -1481,7 +1509,7 @@ namespace jenova
 
 				// Collect Current Used Script
 				jenova::Output("Collecting ([color=#53b5ab]%lld[/color]) C++ Script Object In Use...", ScriptManager::get_singleton()->get_script_object_count());
-				unordered_map<string, Ref<CPPScript>> usedScripts;
+				std::unordered_map<std::string, Ref<CPPScript>> usedScripts;
 				for (size_t i = 0; i < ScriptManager::get_singleton()->get_script_object_count(); i++)
 				{
 					Ref<CPPScript> scriptObject = ScriptManager::get_singleton()->get_script_object(i);
@@ -1725,7 +1753,7 @@ namespace jenova
 						jenova::OutputColored("#2ebc78", "Falling Back to Previous Build, No Change Detected. Fallback Time : [color=#c8e38a]%f ms[/color]", JenovaTinyProfiler::GetCheckpointTimeAndDispose("JenovaCompileMT"));
 					
 						// Start Interpreter Execution
-						JenovaInterpreter::SetExecutionState(true);
+						JenovaInterpreter::SetExecutionPermission(true);
 
 						// Call Build Success
 						OnBuildSuccess();
@@ -1976,7 +2004,7 @@ namespace jenova
 				}
 
 				// Stop Interpreter Execution
-				JenovaInterpreter::SetExecutionState(false);
+				JenovaInterpreter::SetExecutionPermission(false);
 
 				// Verbose
 				jenova::Output("Bootstrapping Generated Module...");
@@ -2638,6 +2666,7 @@ namespace jenova
 				vs_selector_window->set_title("Visual Studio Selector");
 				vs_selector_window->set_size(Vector2i(SCALED(400), SCALED(270)));
 				vs_selector_window->set_flag(Window::Flags::FLAG_RESIZE_DISABLED, true);
+				vs_selector_window->set_flag(Window::Flags::FLAG_MAXIMIZE_DISABLED, true);
 				vs_selector_window->set_flag(Window::Flags::FLAG_POPUP, true);
 
 				// Show Window [Must Be Here]
@@ -2683,7 +2712,7 @@ namespace jenova
 				window_surface->add_child(instances_label);
 
 				OptionButton* instances_selector = memnew(OptionButton);
-				instances_selector->set_name("InstancesSelector");
+				instances_selector->set_name("InstanceSelector");
 				instances_selector->set_anchors_and_offsets_preset(Control::PRESET_TOP_WIDE);
 				instances_selector->set_anchor_and_offset(Side::SIDE_TOP, 0.0, SCALED(29.0));
 				instances_selector->set_anchor_and_offset(Side::SIDE_BOTTOM, 0.0, SCALED(74.0));
@@ -2736,8 +2765,10 @@ namespace jenova
 					VSSelectorEventManager(JenovaEditorPlugin* _plugin, Window* _window) : pluginInstance(_plugin), window(_window) { }
 					void OnGenerateButtonClick()
 					{
-						OptionButton* instances_selector = window->get_node<OptionButton>("VsSelectorWindow/WindowSurface/InstancesSelector");
-						VisualStudioInstance& vsInstance = pluginInstance->GetVisualStudioInstance(instances_selector->get_selected_id());
+						OptionButton* instance_selector = window->get_node<OptionButton>("VsSelectorWindow/WindowSurface/InstanceSelector");
+						OptionButton* toolset_selector = window->get_node<OptionButton>("VsSelectorWindow/WindowSurface/ToolsetSelector");
+						VisualStudioInstance& vsInstance = pluginInstance->GetVisualStudioInstance(instance_selector->get_selected_id());
+						vsInstance.platformToolset = String(pluginInstance->GetVisualStudioInstance(toolset_selector->get_selected_id()).platformToolset);
 						if (!pluginInstance->ExportVisualStudioProject(vsInstance))
 						{
 							jenova::Error("Jenova Utilities", "Failed to Export Project to Visual Studio Solution.");
@@ -2985,6 +3016,9 @@ namespace jenova
 
 				// Generate Project User File
 				std::string projectUserTemplate = std::string(BUFFER_PTR_SIZE_PARAM(jenova::visualstudio::VS_PROJECT_USER_TEMPLATE));
+				jenova::ReplaceAllMatchesWithString(projectUserTemplate, "@@ENGINE_PATH@@", jenova::GetExecutablePath());
+				jenova::ReplaceAllMatchesWithString(projectUserTemplate, "@@PROJECT_PATH@@", AS_STD_STRING(jenova::GetJenovaProjectDirectory()));
+				jenova::ReplaceAllMatchesWithString(projectUserTemplate, "@@WORKING_DIRECTORY@@", jenova::GetExecutableDirectory());
 				if (!jenova::WriteStdStringToFile(projectUserFile, projectUserTemplate)) return false;
 
 				// Generate Source Control Git Ignore
@@ -3112,6 +3146,7 @@ namespace jenova
 
 				// Generate VSCode Files Path
 				std::string cppPropertiesFile = vsCodeDirectory + "/" + "c_cpp_properties.json";
+				std::string launchPropertiesFile = vsCodeDirectory + "/" + "launch.json";
 				std::string vsCodeSettingsFile = vsCodeDirectory + "/" + "settings.json";
 
 				// Create Compiler [For Obtaining Settings Only]
@@ -3168,23 +3203,23 @@ namespace jenova
 
 				// Helper Functions
 				auto CreateJsonArrayFromString = [&](std::string input) -> jenova::json_t
-					{
-						if (!input.empty() && input.back() == ';') input.pop_back();
-						std::stringstream ss(input);
-						std::string item;
-						std::vector<std::string> elements;
-						while (std::getline(ss, item, ';')) elements.push_back(item);
-						jenova::json_t jsonArray = elements;
-						return jsonArray;
-					};
+				{
+					if (!input.empty() && input.back() == ';') input.pop_back();
+					std::stringstream ss(input);
+					std::string item;
+					std::vector<std::string> elements;
+					while (std::getline(ss, item, ';')) elements.push_back(item);
+					jenova::json_t jsonArray = elements;
+					return jsonArray;
+				};
 				auto CreateJsonObjectFromDelimitedString = [&](const std::string& input, const char delimiter) -> jenova::json_t
-					{
-						std::stringstream ss(input);
-						std::string item;
-						jenova::json_t jsonObject;
-						while (std::getline(ss, item, delimiter)) jsonObject[item] = true;
-						return jsonObject;
-					};
+				{
+					std::stringstream ss(input);
+					std::string item;
+					jenova::json_t jsonObject;
+					while (std::getline(ss, item, delimiter)) jsonObject[item] = true;
+					return jsonObject;
+				};
 
 				// Generate Visual Studio Code Project
 				try
@@ -3192,9 +3227,10 @@ namespace jenova
 					// Create C++ Properties
 					jenova::json_t cppProperties, configuration;
 					jenova::json_t configurations = jenova::json_t::array();
+
 					configuration["name"] = "Jenova-Framework";
 					configuration["cStandard"] = "c17";
-					configuration["cppStandard"] = "c++20";
+					configuration["cppStandard"] = "c++20"; // Get from Compiler
 					configuration["compilerPath"] = std::filesystem::absolute(compilerBinary).string();
 					configuration["includePath"] = CreateJsonArrayFromString("./;./Jenova/JenovaSDK;" + solvedRedotKitPath + ";" + extraIncludeDirectories);
 					configuration["forcedInclude"] = CreateJsonArrayFromString(forcedHeaders);
@@ -3208,14 +3244,44 @@ namespace jenova
 					cppProperties["version"] = 4;
 
 					// Serialize C++ Properties
-					jenova::SerializedData cppPropertiesSerialized = cppProperties.dump(4);
-					jenova::ReplaceAllMatchesWithString(cppPropertiesSerialized, "\\\\", "/");
-					jenova::ReplaceAllMatchesWithString(cppPropertiesSerialized, "\\", "/");
+					jenova::SerializedData cppPropertiesSerialized = jenova::NormalizeBackslashes(cppProperties.dump(4));
 
 					// Write C++ Properties to File
 					if (!jenova::WriteStdStringToFile(cppPropertiesFile, cppPropertiesSerialized))
 					{
 						jenova::Error("Jenova Visual Studio Code Exporter", "Unable to Create C++ Properties File!");
+						return false;
+					}
+
+					// Create Launch Settings
+					jenova::json_t launchProperties, dbgConfiguration;
+					jenova::json_t dbgConfigurations = json_t::array();
+
+					dbgConfiguration["name"] = "Jenova Module Debug";
+					dbgConfiguration["type"] = "cppvsdbg";
+					dbgConfiguration["request"] = "launch";
+					dbgConfiguration["program"] = jenova::GetExecutablePath();
+					dbgConfiguration["args"] = json_t::array();
+					dbgConfiguration["args"].push_back("--path");
+					dbgConfiguration["args"].push_back(AS_STD_STRING(jenova::GetJenovaProjectDirectory()));
+					dbgConfiguration["args"].push_back("--Enable-Debug-Mode");
+					dbgConfiguration["stopAtEntry"] = false;
+					dbgConfiguration["cwd"] = jenova::GetExecutableDirectory();
+					dbgConfiguration["environment"] = json_t::array();
+					dbgConfiguration["console"] = "externalTerminal";
+
+					// Finalize Launch Properties
+					dbgConfigurations.push_back(dbgConfiguration);
+					launchProperties["configurations"] = dbgConfigurations;
+					launchProperties["version"] = "0.2.0";
+
+					// Serialize Launch Properties
+					jenova::SerializedData launchPropertiesSerialized = jenova::NormalizeBackslashes(launchProperties.dump(4));
+
+					// Write Launch Properties to File
+					if (!jenova::WriteStdStringToFile(launchPropertiesFile, launchPropertiesSerialized))
+					{
+						jenova::Error("Jenova Visual Studio Code Exporter", "Unable to Create Launch/Debug Properties File!");
 						return false;
 					}
 
@@ -3629,6 +3695,7 @@ namespace jenova
 				configure_build_window->set_title("Build Configuration");
 				configure_build_window->set_size(Vector2i(SCALED(400), SCALED(270)));
 				configure_build_window->set_flag(Window::Flags::FLAG_RESIZE_DISABLED, true);
+				configure_build_window->set_flag(Window::Flags::FLAG_MAXIMIZE_DISABLED, true);
 				configure_build_window->set_flag(Window::Flags::FLAG_POPUP, true);
 
 				// Show Window [Must Be Here]
@@ -3775,6 +3842,7 @@ namespace jenova
 				module_exporter_window->set_title("Jenova Module Exporter");
 				module_exporter_window->set_size(Vector2i(SCALED(400), SCALED(160)));
 				module_exporter_window->set_flag(Window::Flags::FLAG_RESIZE_DISABLED, true);
+				module_exporter_window->set_flag(Window::Flags::FLAG_MAXIMIZE_DISABLED, true);
 				module_exporter_window->set_flag(Window::Flags::FLAG_POPUP, true);
 
 				// Show Window [Must Be Here]
@@ -3900,6 +3968,7 @@ namespace jenova
 				jenova_about_window->set_title("About Projekt Jenova");
 				jenova_about_window->set_size(Vector2i(SCALED(750), SCALED(650)));
 				jenova_about_window->set_flag(Window::Flags::FLAG_RESIZE_DISABLED, true);
+				jenova_about_window->set_flag(Window::Flags::FLAG_MAXIMIZE_DISABLED, true);
 				jenova_about_window->set_flag(Window::Flags::FLAG_POPUP, true);
 
 				// Show Window [Must Be Here]
@@ -3933,7 +4002,7 @@ namespace jenova
 				about_image->set_offset(Side::SIDE_BOTTOM, SCALED(-30.0));
 				about_image->set_v_grow_direction(Control::GROW_DIRECTION_BOTH);
 				about_image->set_expand_mode(TextureRect::ExpandMode::EXPAND_FIT_HEIGHT); 
-				about_image->set_texture(jenova::CreateImageTextureFromByteArray(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(PNG_ABOUT_IMAGE))));
+				about_image->set_texture(MAKE_IMAGE_FROM_BUFFER(BUFFER_PTR_SIZE_PARAM(JENOVA_RESOURCE(PNG_ABOUT_IMAGE)), ImageFormat::PNG));
 				jenova_about_ui->add_child(about_image);
 
 				// Add Title Label
@@ -3969,18 +4038,16 @@ namespace jenova
 				// Add Description Label
 				Label* description = memnew(Label);
 				description->set_name("Description");
-				description->set_offset(Side::SIDE_LEFT, SCALED(322.0));
-				description->set_offset(Side::SIDE_TOP, SCALED(120.0));
-				description->set_offset(Side::SIDE_RIGHT, SCALED(740.0));
+				description->set_offset(Side::SIDE_LEFT, SCALED(320.0));
+				description->set_offset(Side::SIDE_TOP, SCALED(110.0));
+				description->set_offset(Side::SIDE_RIGHT, SCALED(742.0));
 				description->set_offset(Side::SIDE_BOTTOM, SCALED(450.0));
 				description->add_theme_color_override("font_color", Color(1, 1, 1, 0.53));
 				description->set_text(
-					"Projekt J.E.N.O.V.A is a series of components for the Redot Game Engine "
-					"that brings fully-featured C++ scripting directly into the Redot Editor. "
-					"It allows the use of modern C++20 standards within the Redot Engine, similar to GDScript.\n\n"
-					"With Projekt J.E.N.O.V.A, You can create anything!\nFrom Desktop Software to AAA Quality Games. \n"
-					"It's a full toolset with all the features C++ compilers provide.\n\n"
-					"For More Information Visit Official Website.\n"
+					"Project J.E.N.O.V.A was launched in 2024 with a bold vision, to transform Godot Engine into a high-end engine by harnessing cutting-edge technologies.\n"
+					"At its core lies the Jenova Runtime, a fully-featured C++ scripting backend that elevates C/C++ language to a first-class citizen within the engine.\n"
+					"Since its inception, it has consistently pushed the boundaries, introducing innovative features that streamline development across various fields.\n"
+					"From crafting desktop applications to creating high performance AAA-quality video games, the project has made significant strides in making game development more accessible and efficient.\n"
 				);
 				description->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);
 				description->add_theme_font_size_override("font_size", SCALED(16));
@@ -4038,7 +4105,7 @@ namespace jenova
 				open_web_button->set_offset(Side::SIDE_BOTTOM, SCALED(230.0));
 				open_web_button->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 				open_web_button->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-				open_web_button->add_theme_color_override("font_color", Color(0.427828, 0.675155, 0.933394, 1));
+				open_web_button->add_theme_color_override("font_color", editor_theme->get_color("accent_color", "Editor"));
 				open_web_button->set_text("Open Projekt Jenova Website");
 				jenova_about_ui->add_child(open_web_button);
 				open_web_button->call_deferred("grab_focus");
@@ -4142,7 +4209,7 @@ namespace jenova
 							}
 
 							// Cooldown Time
-							static std::chrono::steady_clock::time_point lastScriptChangeTime = std::chrono::steady_clock::time_point();
+							static jenova::SteadyTimePoint lastScriptChangeTime = jenova::SteadyTimePoint();
 
 							// Trigger Cooldown
 							JenovaEditorPlugin::get_singleton()->buildSystemMutex->lock();
@@ -4354,7 +4421,6 @@ namespace jenova
 			// Types
 			enum class RuntimeEvent
 			{
-				/* Must Match to JenovaSDK One */
 				Initialized,
 				Started,
 				Stopped,
@@ -4779,13 +4845,15 @@ namespace jenova
 				ClassDB::register_internal_class<CPPHeaderResourceSaver>();
 				ClassDB::register_internal_class<JenovaScriptManager>();
 
-				// Initialize Classes
+				// Initialize Core Classes
 				CPPScriptLanguage::init();
 				CPPHeaderLanguage::init();
 				CPPScriptResourceLoader::init();
 				CPPScriptResourceSaver::init();
 				CPPHeaderResourceLoader::init();
 				CPPHeaderResourceSaver::init();
+
+				// Initialize Utility Classes
 				JenovaScriptManager::init();
 				JenovaAssetMonitor::init();
 
@@ -4844,13 +4912,15 @@ namespace jenova
 			// Scene UnInitialize Event
 			if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE)
 			{
-				// Uninitialize Classes
+				// Uninitialize Core Classes
 				CPPScriptLanguage::deinit();
 				CPPHeaderLanguage::deinit();
 				CPPScriptResourceLoader::deinit();
 				CPPScriptResourceSaver::deinit();
 				CPPHeaderResourceLoader::deinit();
 				CPPHeaderResourceSaver::deinit();
+
+				// Uninitialize Utility Classes
 				JenovaScriptManager::deinit();
 				JenovaAssetMonitor::deinit();
 
@@ -5016,8 +5086,7 @@ namespace jenova
 								RemoveFileEncodingInStdString(scriptSourceCode);
 
 								// Line Directive
-								std::string referenceSourceFile = inputFile;
-								jenova::ReplaceAllMatchesWithString(referenceSourceFile, "\\", "\\\\");
+								std::string referenceSourceFile = jenova::NormalizeBackslashes(inputFile);
 								scriptSourceCode = scriptSourceCode.insert(0, jenova::Format("#line 1 \"%s\"\n", referenceSourceFile.c_str()));
 
 								// Process And Extract Properties
@@ -5412,6 +5481,15 @@ namespace jenova
 			return strdup(str);
 		#endif
 	}
+	const wchar_t* CloneWideString(const wchar_t* wstr)
+	{
+		// Bad Approach, Needs Improvement
+		#if defined(_WIN32) || defined(_WIN64)
+			return _wcsdup(wstr);
+		#else
+			return wcsdup(wstr);
+		#endif
+	}
 	int GetEnvironmentEntity(const char* entityName, char* bufferPtr, size_t bufferSize)
 	{
 		// Windows Implementation
@@ -5602,28 +5680,14 @@ namespace jenova
 		va_end(args);
 		return std::string(buffer);
 	}
-	std::string FormatSafe(const char* fmt, ...)
+	String Format(const String fmt, ...)
 	{
+		char buffer[jenova::GlobalSettings::FormatBufferSize];
 		va_list args;
 		va_start(args, fmt);
-
-		// Calculate the size of the formatted string
-		va_list args_copy;
-		va_copy(args_copy, args);
-		int size = std::vsnprintf(nullptr, 0, fmt, args_copy);
-		va_end(args_copy);
-
-		if (size < 0) {
-			va_end(args);
-			throw std::runtime_error("Error During Formatting.");
-		}
-
-		// Create a string with the required size
-		std::vector<char> buffer(size + 1);
-		std::vsnprintf(buffer.data(), buffer.size(), fmt, args);
+		vsnprintf(buffer, sizeof(buffer), AS_STD_STRING(fmt).c_str(), args);
 		va_end(args);
-
-		return std::string(buffer.data(), size);
+		return String(buffer);
 	}
 	void Output(const char* fmt, ...)
 	{
@@ -5766,13 +5830,13 @@ namespace jenova
 		// Suppress if Disabled
 		if (jenova::GlobalStorage::CurrentEditorVerboseOutput == jenova::EditorVerboseOutput::Disabled) return;
 
-		// Generate A Unique Color based on id (Knuth's multiplicative hash, Mod 360 for HUE)
+		// Generate A Unique Color Per ID (Based on Knuth Shuffle)
 		unsigned int hash = id * 2654435761 % 360;
 
 		// Convert HUE to RGB
 		float hue = static_cast<float>(hash);
-		float saturation = 0.8f; // Saturation of 80%
-		float value = 0.9f; // Brightness of 90%
+		float saturation = 0.8f; // Saturation : 80%
+		float value = 0.9f; // Brightness : 90%
 		int hi = static_cast<int>(hue / 60) % 6;
 		float f = hue / 60 - hi;
 		float p = value * (1 - saturation);
@@ -5789,13 +5853,12 @@ namespace jenova
 			case 5: r = value; g = p; b = q; break;
 		}
 
-		// Convert RGB to hex
+		// Convert RGB to Hex
 		std::stringstream colorHash;
 		colorHash << "#" << std::hex 
 			<< std::setw(2) << std::setfill('0') << static_cast<int>(r * 255)
 			<< std::setw(2) << std::setfill('0') << static_cast<int>(g * 255)
 			<< std::setw(2) << std::setfill('0') << static_cast<int>(b * 255);
-
 
 		// Handle Verbose In Different Modes
 		if (QUERY_ENGINE_MODE(Editor))
@@ -5977,6 +6040,25 @@ namespace jenova
 			<< std::setw(4) << now_ms.count();
 		return oss.str();
 	}
+	int GenerateHashFromString(const char* str)
+	{
+		std::string input(str);
+		size_t hash = 0;
+		for (char c : input) hash = hash * 31 + c;
+		return hash;
+	}
+	Color GenerateColorVariation(Color initColor, int variationFactor)
+	{
+		static int variationSeed = 0;
+		if (variationFactor == -1)
+		{
+			variationSeed = 0;
+			return initColor;
+		}
+		variationFactor = MIN(variationFactor, 30);
+		initColor.set_hsv(Math::fmod((1.0f / float(variationFactor)) * float(variationSeed++), 0.9f), initColor.get_s() * 0.9f, initColor.get_v() * 1.4f, 0.8f);
+		return initColor;
+	}
 	jenova::EngineMode GetCurrentEngineInstanceMode()
 	{
 		return jenova::GlobalStorage::CurrentEngineMode;
@@ -5999,11 +6081,11 @@ namespace jenova
 			return "Unknown";
 		}
 	}
-	Ref<ImageTexture> CreateImageTextureFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageCreationFormat imageFormat)
+	Ref<ImageTexture> CreateImageTextureFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, ImageFormat imageFormat)
 	{
 		return CreateImageTextureFromByteArrayEx(imageDataPtr, imageDataSize, Vector2i(), imageFormat);
 	}
-	Ref<ImageTexture> CreateImageTextureFromByteArrayEx(const uint8_t* imageDataPtr, size_t imageDataSize, const Vector2i& imageSize, jenova::ImageCreationFormat imageFormat)
+	Ref<ImageTexture> CreateImageTextureFromByteArrayEx(const uint8_t* imageDataPtr, size_t imageDataSize, const Vector2i& imageSize, jenova::ImageFormat imageFormat)
 	{
 		PackedByteArray imageDataPackedBytes;
 		imageDataPackedBytes.resize(imageDataSize);
@@ -6012,13 +6094,13 @@ namespace jenova
 		godot::Error loadResult = godot::Error::FAILED;
 		switch (imageFormat)
 		{
-		case jenova::ImageCreationFormat::PNG:
+		case jenova::ImageFormat::PNG:
 			loadResult = createdImage->load_png_from_buffer(imageDataPackedBytes);
 			break;
-		case jenova::ImageCreationFormat::JPG:
+		case jenova::ImageFormat::JPG:
 			loadResult = createdImage->load_jpg_from_buffer(imageDataPackedBytes);
 			break;
-		case jenova::ImageCreationFormat::SVG:
+		case jenova::ImageFormat::SVG:
 			loadResult = createdImage->load_svg_from_buffer(imageDataPackedBytes);
 			break;
 		default:
@@ -6038,7 +6120,7 @@ namespace jenova
 		}
 		return nullptr;
 	}
-	Ref<ImageTexture> CreateMenuItemIconFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, jenova::ImageCreationFormat imageFormat)
+	Ref<ImageTexture> CreateMenuItemIconFromByteArray(const uint8_t* imageDataPtr, size_t imageDataSize, jenova::ImageFormat imageFormat)
 	{
 		PackedByteArray imageDataPackedBytes;
 		imageDataPackedBytes.resize(imageDataSize);
@@ -6047,13 +6129,13 @@ namespace jenova
 		godot::Error loadResult = godot::Error::FAILED;
 		switch (imageFormat)
 		{
-		case jenova::ImageCreationFormat::PNG:
+		case jenova::ImageFormat::PNG:
 			loadResult = createdImage->load_png_from_buffer(imageDataPackedBytes);
 			break;
-		case jenova::ImageCreationFormat::JPG:
+		case jenova::ImageFormat::JPG:
 			loadResult = createdImage->load_jpg_from_buffer(imageDataPackedBytes);
 			break;
-		case jenova::ImageCreationFormat::SVG:
+		case jenova::ImageFormat::SVG:
 			loadResult = createdImage->load_svg_from_buffer(imageDataPackedBytes);
 			break;
 		default:
@@ -6091,6 +6173,20 @@ namespace jenova
 
 		// Return Loaded Font
 		return newFont;
+	}
+	Ref<Shader> CreateShaderFromString(const String& shaderCode)
+	{
+		Ref<Shader> shader;
+		shader.instantiate();
+		shader->set_code(shaderCode);
+		return shader;
+	}
+	Ref<ShaderMaterial> CreateShaderMaterialFromString(const String& shaderCode)
+	{
+		Ref<ShaderMaterial> shaderMaterial;
+		shaderMaterial.instantiate();
+		shaderMaterial->set_shader(jenova::CreateShaderFromString(shaderCode));
+		return shaderMaterial;
 	}
 	bool CollectResourcesFromFileSystem(const String& rootPath, const String& extensions, jenova::ResourceCollection& collectedResources, bool respectGDIgnore)
 	{
@@ -6315,6 +6411,10 @@ namespace jenova
 
 		// Not Implemented
 		return std::string();
+	}
+	std::string GetExecutableDirectory()
+	{
+		return filesystem::path(GetExecutablePath()).parent_path().string();
 	}
 	void ResetCurrentDirectoryToRoot()
 	{
@@ -7355,14 +7455,21 @@ namespace jenova
 		if (addBrackets) formattedHash = "{" + formattedHash + "}";
 		return formattedHash;
 	}
+	std::string NormalizeBackslashes(const std::string& input)
+	{
+		std::string result = input;
+		jenova::ReplaceAllMatchesWithString(result, "\\\\", "/");
+		jenova::ReplaceAllMatchesWithString(result, "\\", "/");
+		jenova::ReplaceAllMatchesWithString(result, "//", "/");
+		return result;
+	}
 	std::string NormalizePath(const std::string& input)
 	{
 		std::string result;
 		char prevChar = '\0';
 		for (char c : input)
 		{
-			if (c == '/' && prevChar == '/')
-				continue;
+			if (c == '/' && prevChar == '/') continue;
 			result += (c == '\\') ? '/' : c;
 			prevChar = c;
 		}
@@ -7371,7 +7478,7 @@ namespace jenova
 	std::string NormalizePathForEngine(const std::string& input)
 	{
 		std::string result = NormalizePath(input);
-		return jenova::ReplaceAllMatchesWithStringAndReturn(result, "res:/", "res://");
+		return jenova::ReplaceAllMatchesWithStringAndReturn(result, "res:/", "res://"); // Improve This
 	}
 	bool CompareFilePaths(const std::string& sourcePath, const std::string& destinationPath)
 	{
@@ -7599,11 +7706,13 @@ namespace jenova
 	}
 	std::string GetVisualStudioPlatformToolsetFromVersion(const std::string& versionNumber)
 	{
+		if (versionNumber == "19") return "v145";
 		if (versionNumber == "18") return "v144";
 		if (versionNumber == "17") return "v143";
 		if (versionNumber == "16") return "v142";
 		if (versionNumber == "15") return "v141";
 		if (versionNumber == "14") return "v140";
+		return "v143";
 	}
 	bool CreateFontFileDataPackageFromAsset(const String& assetPath, const String& packagePath)
 	{
@@ -8516,6 +8625,87 @@ namespace jenova
 
 		// Invalid/Unsupported
 		return 0;
+	}
+	String PreprocessScript(Ref<Resource> scriptResource, const Dictionary& preprocessorSettings, CompilerModel compilerModel)
+	{
+		// Get Original Source Code
+		Ref<CPPScript> cppScript = Object::cast_to<CPPScript>(scriptResource.ptr());
+		String scriptSourceCode = cppScript->get_source_code();
+
+		// Reset Line Number
+		String referenceSourceFile = ProjectSettings::get_singleton()->globalize_path(cppScript->get_path());
+		scriptSourceCode = scriptSourceCode.insert(0, String(jenova::Format("#line 1 \"%s\"\n", AS_C_STRING(referenceSourceFile)).c_str()));
+
+		// Process And Extract Properties
+		jenova::SerializedData propertiesMetadata = jenova::ProcessAndExtractPropertiesFromScript(scriptSourceCode, cppScript->GetScriptIdentity());
+		if (!propertiesMetadata.empty() && propertiesMetadata != "null") jenova::WriteStdStringToFile(AS_STD_STRING(String(preprocessorSettings["PropertyMetadata"])), propertiesMetadata);
+
+		// Preprocessor Definitions [Header]
+		String preprocessorDefinitions = "// Jenova Preprocessor Definitions\n";
+
+		// Preprocessor Definitions [Version]
+		preprocessorDefinitions += String(jenova::Format("#define JENOVA_VERSION \"%d.%d.%d.%d\"\n",
+			jenova::GlobalSettings::JenovaBuildVersion[0], jenova::GlobalSettings::JenovaBuildVersion[1],
+			jenova::GlobalSettings::JenovaBuildVersion[2], jenova::GlobalSettings::JenovaBuildVersion[3]).c_str());
+
+		// Preprocessor Definitions [Compiler]
+		#ifdef TARGET_PLATFORM_WINDOWS
+		if (compilerModel == CompilerModel::MicrosoftCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"Microsoft Visual C++ Compiler\"\n";
+			preprocessorDefinitions += "#define MSVC_COMPILER\n";
+		}
+		else if (compilerModel == CompilerModel::ClangLLVMCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"Microsoft Visual C++ Compiler LLVM\"\n";
+			preprocessorDefinitions += "#define MSVC_LLVM_COMPILER\n";
+		}
+		else if (compilerModel == CompilerModel::MinGWCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"MinGW GCC Compiler\"\n";
+			preprocessorDefinitions += "#define MINGW_CLANG_COMPILER\n";
+		}
+		else if (compilerModel == CompilerModel::MinGWClangCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"MinGW Clang Compiler\"\n";
+			preprocessorDefinitions += "#define MINGW_GCC_COMPILER\n";
+		}
+		#endif
+		#ifdef TARGET_PLATFORM_LINUX
+		if (compilerModel == CompilerModel::GNUCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"GNU Compiler Collection\"\n";
+			preprocessorDefinitions += "#define GCC_COMPILER\n";
+		}
+		else if (compilerModel == CompilerModel::ClangCompiler)
+		{
+			preprocessorDefinitions += "#define JENOVA_COMPILER \"LLVM Clang Compiler\"\n";
+			preprocessorDefinitions += "#define CLANG_COMPILER\n";
+		}
+		#endif
+
+		// Preprocessor Definitions [User]
+		String userPreprocessorDefinitions = preprocessorSettings["PreprocessorDefinitions"];
+		PackedStringArray userPreprocessorDefinitionsList = userPreprocessorDefinitions.split(";");
+		for (const auto& definition : userPreprocessorDefinitionsList) if (!definition.is_empty()) preprocessorDefinitions += "#define " + definition + "\n";
+
+		// Add Final Preprocessor Definitions
+		scriptSourceCode = scriptSourceCode.insert(0, preprocessorDefinitions + "\n");
+
+		// Replecements
+		scriptSourceCode = scriptSourceCode.replace(jenova::GlobalSettings::ScriptToolIdentifier, "#define TOOL_SCRIPT");
+		scriptSourceCode = scriptSourceCode.replace(jenova::GlobalSettings::ScriptBlockBeginIdentifier, "namespace JNV_" + cppScript->GetScriptIdentity() + " {");
+		scriptSourceCode = scriptSourceCode.replace(jenova::GlobalSettings::ScriptBlockEndIdentifier, "}; using namespace JNV_" + cppScript->GetScriptIdentity() + ";");
+		scriptSourceCode = scriptSourceCode.replace(" OnReady", " _ready");
+		scriptSourceCode = scriptSourceCode.replace(" OnAwake", " _enter_tree");
+		scriptSourceCode = scriptSourceCode.replace(" OnDestroy", " _exit_tree");
+		scriptSourceCode = scriptSourceCode.replace(" OnProcess", " _process");
+		scriptSourceCode = scriptSourceCode.replace(" OnPhysicsProcess", " _physics_process");
+		scriptSourceCode = scriptSourceCode.replace(" OnInput", " _input");
+		scriptSourceCode = scriptSourceCode.replace(" OnUserInterfaceInput", " _gui_input");
+
+		// Return Preprocessed Source
+		return scriptSourceCode;
 	}
 	jenova::SerializedData ProcessAndExtractPropertiesFromScript(std::string& scriptSource, const std::string& scriptUID)
 	{
@@ -9469,7 +9659,9 @@ namespace jenova
 			// Run Module In Debug Mode
 			if (argument == "--Enable-Debug-Mode")
 			{
-				JenovaInterpreter::SetDebugModeExecutionState(true);
+				#ifndef JENOVA_PROTECTED_MODE
+					JenovaInterpreter::SetDebugModeExecutionState(true);
+				#endif
 			}
 		}
 
@@ -9609,6 +9801,9 @@ namespace jenova
 			// Validate & Return
 			return runtimeConfig.empty() ? "{}" : runtimeConfig;
 		}
+	
+		// If it's Unknown Fallback
+		return jenova::GenerateRuntimeModuleConfiguration();
 	}
 	bool ResolveAndLoadAddonModulesAtRuntime()
 	{
@@ -9756,6 +9951,28 @@ namespace jenova
 		}
 		else
 		{
+			// Check Ignore File Content
+			String currentIgnoreFileContentHash = jenova::ReadStringFromFile(String(gitIgnoreFile.c_str())).md5_text();
+			String jenovaIgnoreFileContentHash = String(jenova::resources::JenovaGitIngoreTemplate).md5_text();
+			if (currentIgnoreFileContentHash == jenovaIgnoreFileContentHash) return true;
+
+			// Request Overwrite (Windows Only)
+			#ifdef TARGET_PLATFORM_WINDOWS
+			int result = MessageBoxW(HWND(jenova::GetMainWindowNativeHandle()),
+				L"A different GitHub Ignore file already exists.\nWould you like to overwrite existing one?",
+				L"Source Control", MB_YESNO | MB_ICONWARNING
+			);
+			if (result == IDYES)
+			{
+				std::string gitIgnoreTemplate = std::string(BUFFER_PTR_SIZE_PARAM(jenova::resources::JenovaGitIngoreTemplate));
+				if (!jenova::WriteStdStringToFile(gitIgnoreFile, gitIgnoreTemplate)) return false;
+				jenova::Output("GitHub Ignore file has been successfully updated.");
+				return true;
+			}
+			else if (result == IDNO) return true;
+			#endif
+
+			// Warn User About Existing Ignore File
 			jenova::Warning("Source Control", "GitHub Ignore file already exists. Delete it first if you want to regenerate.");
 		}
 		return true;
@@ -10169,7 +10386,7 @@ namespace jenova
 		line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
 		if (SymGetLineFromAddr64(process, address, &displacement, &line))
 		{
-			functionFile = FindScriptPathFromPreprocessedFile(line.FileName);
+			functionFile = AS_STD_STRING(ProjectSettings::get_singleton()->localize_path(String(line.FileName)));
 			functionLine = line.LineNumber;
 		}
 		else
@@ -10181,7 +10398,7 @@ namespace jenova
 
 		// Print Access Violation Error
 		std::string errorMessage = jenova::Format("Jenova Runtime Execution Error :: %s", jenova::GetExceptionDescription(exceptionInfo).c_str());
-		std::string instructionPtr = jenova::Format("Instruction ADdress : 0x%010X", exceptionInfo->ExceptionRecord->ExceptionAddress);
+		std::string instructionPtr = jenova::Format("Instruction Address : 0x%010X", exceptionInfo->ExceptionRecord->ExceptionAddress);
 		godot::_err_print_error(functionName.c_str(), functionFile.c_str(), functionLine, errorMessage.c_str());
 
 		// Suppress the Exception

@@ -38,7 +38,9 @@
 #include <classes/scene_tree.hpp>
 #include <classes/resource_saver.hpp>
 #include <classes/resource_loader.hpp>
+#include <classes/font.hpp>
 #include <classes/texture2d.hpp>
+#include <classes/material.hpp>
 #include <templates/vector.hpp>
 #include <variant/string.hpp>
 #include <variant/node_path.hpp>
@@ -63,10 +65,12 @@ using namespace std;
 // Import External Functions
 namespace jenova
 {
-	extern void Alert(const char* fmt, ...);
-	extern void Error(const char* stageName, const char* fmt, ...);
-	extern void Warning(const char* stageName, const char* fmt, ...);
-	extern int ShowMessageBox(const char* msg, const char* title, int flags);
+	extern void Alert(const char*, ...);
+	extern void Error(const char*, const char*, ...);
+	extern void Warning(const char*, const char*, ...);
+	extern int ShowMessageBox(const char*, const char*, int);
+	extern const char* CloneString(const char*);
+	extern const wchar_t* CloneWideString(const wchar_t*);
 };
 
 // Internal Structs
@@ -84,7 +88,7 @@ struct NodeBackup
 class EventCallback : public godot::RefCounted
 {
 private:
-	void* callback;
+	void* callback = nullptr;
 
 public:
 	void OnEventCall()
@@ -261,27 +265,15 @@ namespace jenova::sdk
 	{
 		std::string str((char*)godotStr.utf8().ptr(), godotStr.utf8().size());
 		if (!str.empty() && str.back() == '\0') str.pop_back();
-
-		// Bad Approach, Needs Improvement
-		#if defined(_WIN32) || defined(_WIN64)
-			return _strdup(str.c_str());
-		#else
-			return strdup(str.c_str());
-		#endif
+		return jenova::CloneString(str.c_str());
 	}
 	WideStringPtr JenovaSDK::GetWCStr(const godot::String& godotStr)
 	{
 		godot::PackedByteArray wchar_buffer = godotStr.to_wchar_buffer();
 		size_t length = wchar_buffer.size() / sizeof(wchar_t);
-		std::wstring str((wchar_t*)wchar_buffer.ptr(), length);
-		if (!str.empty() && str.back() == L'\0') str.pop_back();
-
-		// Bad Approach, Needs Improvement
-		#if defined(_WIN32) || defined(_WIN64)
-				return _wcsdup(str.c_str());
-		#else
-				return wcsdup(str.c_str());
-		#endif
+		std::wstring wstr((wchar_t*)wchar_buffer.ptr(), length);
+		if (!wstr.empty() && wstr.back() == L'\0') wstr.pop_back();
+		return jenova::CloneWideString(wstr.c_str());
 	}
 	ObjectPtr JenovaSDK::GetObjectPointer(NativePtr obj)
 	{
@@ -320,15 +312,39 @@ namespace jenova::sdk
 namespace jenova::sdk
 {
 	// Helpers Utilities
-	void JenovaSDK::Alert(StringPtr fmt, va_list args)
+	void JenovaSDK::Alert(StringPtr format, va_list args)
 	{
 		char buffer[1024];
-		vsnprintf(buffer, sizeof(buffer), fmt, args);
+		vsnprintf(buffer, sizeof(buffer), format, args);
 		ShowMessageBox(buffer, "[JENOVA-SDK]", 0);
 	}
 	jenova::sdk::EngineMode JenovaSDK::GetEngineMode()
 	{
 		return jenova::sdk::EngineMode(jenova::GlobalStorage::CurrentEngineMode);
+	}
+	godot::Ref<godot::Font> JenovaSDK::CreateFontFromBuffer(BufferPtr bufferPtr, size_t bufferSize)
+	{
+		return jenova::CreateFontFileFromByteArray(bufferPtr, bufferSize);
+	}
+	godot::Ref<godot::Texture2D> JenovaSDK::CreateImageFromBuffer(BufferPtr bufferPtr, size_t bufferSize, StringPtr format, ImageSize size)
+	{
+		if (godot::String(format).to_lower() == "png")
+		{
+			return jenova::CreateImageTextureFromByteArrayEx(bufferPtr, bufferSize, size, jenova::ImageFormat::PNG);
+		}
+		if (godot::String(format).to_lower() == "jpg")
+		{
+			return jenova::CreateImageTextureFromByteArrayEx(bufferPtr, bufferSize, size, jenova::ImageFormat::JPG);
+		}
+		if (godot::String(format).to_lower() == "svg")
+		{
+			return jenova::CreateImageTextureFromByteArrayEx(bufferPtr, bufferSize, size, jenova::ImageFormat::SVG);
+		}
+		return nullptr;
+	}
+	godot::Ref<godot::Material> JenovaSDK::CreateShaderMaterialFromSource(const godot::String& shaderSource)
+	{
+		return jenova::CreateShaderMaterialFromString(shaderSource);
 	}
 	bool JenovaSDK::CreateDirectoryMonitor(const String& directoryPath)
 	{
@@ -356,7 +372,7 @@ namespace jenova::sdk
 	}
 	bool JenovaSDK::ReloadJenovaRuntime(RuntimeReloadMode reloadMode)
 	{
-		jenova::sdk::Output("ReloadJenovaRuntime -> Not Implemented Yet");
+		jenova::sdk::Output("ReloadJenovaRuntime is Not Implemented Yet");
 		return false;
 	}
 	void JenovaSDK::CreateCheckpoint(const godot::String& checkPointName)
@@ -644,6 +660,12 @@ namespace jenova::sdk
 	{
 		return Clektron::get_singleton()->ExecuteScriptFromFile(std::string(ctronScriptFile), noEntrypoint);
 	}
+	bool JenovaSDK::BindSymbol(FunctionPtr symbolPtr, StringPtr symbolName, StringPtr returnType, int paramCount, va_list args)
+	{
+		std::vector<std::string> parameters;	
+		for (int i = 0; i < paramCount; i++) parameters.push_back(va_arg(args, const char*));
+		return Clektron::get_singleton()->BindSymbol(symbolPtr, std::string(symbolName), std::string(returnType), parameters);
+	}
 	bool JenovaSDK::ExecuteScript(const godot::String& ctronScript, bool noEntrypoint)
 	{
 		return Clektron::get_singleton()->ExecuteScript(ctronScript, noEntrypoint);
@@ -651,6 +673,24 @@ namespace jenova::sdk
 	bool JenovaSDK::ExecuteScriptFromFile(const godot::String& ctronScriptFile, bool noEntrypoint)
 	{
 		return Clektron::get_singleton()->ExecuteScriptFromFile(ctronScriptFile, noEntrypoint);
+	}
+	bool JenovaSDK::BindSymbol(FunctionPtr symbolPtr, const godot::String& symbolName, const godot::String& returnType, int paramCount, va_list args)
+	{
+		return this->BindSymbol(symbolPtr, symbolName.utf8().ptr(), returnType.utf8().ptr(), paramCount, args);
+	}
+
+	// Profiling Utilities (Sentinel)
+	bool JenovaSDK::IsProfilerEnabled()
+	{
+		return JenovaProfiler::IsEnabled();
+	}
+	bool JenovaSDK::CommitRecord(StringPtr recordName, double recordTime)
+	{
+		return JenovaProfiler::AddStageRecord(recordName, recordTime);
+	}
+	bool JenovaSDK::CommitScriptRecord(StringPtr fileName, StringPtr recordName, double recordTime)
+	{
+		return JenovaProfiler::AddStageRecord(fileName, recordName, recordTime);
 	}
 }
 
@@ -669,7 +709,7 @@ namespace jenova
 	}
 	void* GetJenovaSDKFunctionSolver()
 	{
-		return reinterpret_cast<void*>(&jenova::sdk::GetSDKFunction);
+		return reinterpret_cast<sdk::NativePtr>(&jenova::sdk::GetSDKFunction);
 	}
 	bool ReleaseJenovaSDKInterface(JenovaSDKInterface sdkInterface)
 	{
@@ -755,6 +795,7 @@ namespace jenova
 		// Solve C Scripting Utilities (Clektron) Functions
 		if (string(sdkFunctionName) == "ExecuteScript") return FunctionPtr((bool(*)(StringPtr, bool))(&clektron::ExecuteScript));
 		if (string(sdkFunctionName) == "ExecuteScriptFromFile") return FunctionPtr((bool(*)(StringPtr, bool))(&clektron::ExecuteScriptFromFile));
+		if (string(sdkFunctionName) == "BindSymbol") return FunctionPtr((bool(*)(FunctionPtr, StringPtr, StringPtr, int, ...))(&clektron::BindSymbol));
 
 		// Invalid Function
 		return nullptr;
