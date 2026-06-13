@@ -17,10 +17,10 @@
 #include "Jenova.hpp"
 
 // Jenova Script Instance Definition
-class CPPScriptInstance : public ScriptInstanceExtension
+class CPPScriptInstance : public jenova::ScriptInstanceExtension
 {
 protected:
-	Object* owner;
+	Object* owner = nullptr;
 	Ref<CPPScript> script;
 	mutable Dictionary instanceProperties;
 	mutable List<MethodInfo> methodsInfo;

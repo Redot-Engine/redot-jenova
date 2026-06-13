@@ -1,7 +1,12 @@
+# ============================================================================
 # Jenova Runtime Build System Script
+# ----------------------------------------------------------------------------
 # Developed by Hamid.Memar (2024-present)
-# Usage : python3 ./Jenova.Builder.py --compiler win-msvc --skip-banner
-# Use python3 ./Jenova.Builder.py --help For More Information.
+# ----------------------------------------------------------------------------
+# USAGE GUIDE:
+# 1. Standard Run:   python ./Jenova.Builder.py --compiler win-msvc
+# 2. Help/Details:   python ./Jenova.Builder.py --help
+# ============================================================================
 
 # Imports
 import os
@@ -62,7 +67,7 @@ sources = [
 
 # Global Options
 builder_version     = "3.0"
-deps_version        = "26.1"
+deps_version        = "26.LTS"
 double_precision    = False
 static_build        = False
 skip_deps           = False
@@ -190,7 +195,7 @@ def generate_rdsdk(output_dir):
         lib_name = f"libredotcpp-static-x86_64{ext}"
         src_lib_path = os.path.join("./Libs", lib_name)
         if os.path.exists(src_lib_path):
-            dst_lib_name = f"libGodot.x64{ext}"
+            dst_lib_name = f"libRedot.x64{ext}"
             dst_lib_path = os.path.join(target_sdk_path, dst_lib_name)
             shutil.copy2(src_lib_path, dst_lib_path)
 
@@ -1472,6 +1477,9 @@ if __name__ == "__main__":
     parser.add_argument('--clean-up', action='store_true', help='Clean Up Build Files')
     parser.add_argument('--deep-clean-up', action='store_true', help='Clean Up Everything')
     parser.add_argument('--generate-rdsdk', action='store_true', help='Generate RedotSDK Package')
+    parser.add_argument('--protected-mode', action='store_true', help='Build Jenova Runtime in Protected Mode')
+    parser.add_argument('--enable-blade', action='store_true', help='Build Jenova Runtime featuring Blade Language')
+    parser.add_argument('--lithium-edition', action='store_true', help='Build Jenova Runtime for Lithium IDE')
 
     # Parser Arguments
     args = parser.parse_args()
@@ -1513,6 +1521,14 @@ if __name__ == "__main__":
     if args.deep_clean_up:
         rgb_print("#367fff", "[ ^ ] Cleaning Up Everything...")
         clean_up_build(True)
+
+    # Handle Protected Mode
+    if args.protected_mode:
+        flags.append("JENOVA_PROTECTED_MODE")
+
+    # Handle Lithium Edition
+    if args.lithium_edition:
+        flags.append("LITHIUM_EDITION")
 
     # Set Compiler And Start Build
     start_time = time.time()

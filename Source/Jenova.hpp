@@ -24,7 +24,7 @@
 #define APP_VERSION_MIDDLEFIX			" "
 #define APP_VERSION_POSTFIX				"Beta"
 #define APP_VERSION_SINGLECHAR			"b"
-#define APP_VERSION_DATA				0, 3, 9, 3
+#define APP_VERSION_DATA				0, 3, 9, 5
 #define APP_VERSION_BUILD				"0"
 #define APP_VERSION_NAME				"Redot Edition"
 
@@ -119,7 +119,6 @@
 #include <filesystem>
 
 // Godot SDK :: Core
-#include <gdextension_interface.h>
 #include <godot.hpp>
 #include <core/defs.hpp>
 #include <core/version.hpp>
@@ -220,8 +219,6 @@
 #include <classes/semaphore.hpp>
 #include <classes/performance.hpp>
 #include <classes/script.hpp>
-#include <classes/script_editor.hpp>
-#include <classes/script_editor_base.hpp>
 #include <classes/script_extension.hpp>
 #include <classes/script_language.hpp>
 #include <classes/script_language_extension.hpp>
@@ -236,8 +233,6 @@
 #include <templates/pair.hpp>
 #include <templates/self_list.hpp>
 #include <templates/vector.hpp>
-#include <templates/list.hpp>
-#include <templates/pair.hpp>
 #include <templates/local_vector.hpp>
 
 // Godot SDK :: Variant
@@ -253,6 +248,7 @@
 #include <variant/utility_functions.hpp>
 
 // Godot SDK :: Editor
+#include <classes/script_editor.hpp>
 #include <classes/editor_file_system.hpp>
 #include <classes/editor_file_dialog.hpp>
 #include <classes/editor_interface.hpp>
@@ -266,6 +262,7 @@
 #include <classes/editor_import_plugin.hpp>
 #include <classes/editor_inspector_plugin.hpp>
 #include <classes/editor_command_palette.hpp>
+#include <classes/editor_syntax_highlighter.hpp>
 #include <classes/editor_debugger_session.hpp>
 #include <classes/editor_debugger_plugin.hpp>
 #include <classes/editor_resource_conversion_plugin.hpp>
@@ -279,6 +276,15 @@
 #include <classes/editor_feature_profile.hpp>
 #include <classes/editor_scene_post_import_plugin.hpp>
 #endif
+
+// GDExtension Interface
+#include <gdextension_interface.h>
+#define GDX_LIBRARY ::godot::internal::library
+#define GDX_UNREGISTER_EXCLASS ::godot::internal::gdextension_interface_classdb_unregister_extension_class
+#define GDX_CREATE_SCRIPT_INSTANCE ::godot::internal::gdextension_interface_script_instance_create3
+#define GDX_DESTROY_OBJECT ::godot::internal::gdextension_interface_object_destroy
+#define GDX_LOAD_XML_FROM_UTF8 ::godot::internal::gdextension_interface_editor_help_load_xml_from_utf8_chars_and_len
+#define GDX_GET_UTILITY_FUNC_PTR ::godot::internal::gdextension_interface_variant_get_ptr_utility_function
 
 // Shared Third-Party
 #include <Parsers/json.hpp>
@@ -774,8 +780,6 @@ namespace jenova
 	// Global Settings
 	namespace GlobalSettings
 	{
-		constexpr ModuleInitializationLevel PluginInitializationLevel(MODULE_INITIALIZATION_LEVEL_SCENE);
-
 		constexpr bool VerboseEnabled							= false;
 		constexpr bool ScriptingEnabled							= true;
 		constexpr bool ConsoleEnabled							= true;
@@ -953,6 +957,7 @@ namespace jenova
 	jenova::SmartString ConvertToStdString(const godot::StringName& gstr);
 	jenova::SmartWstring ConvertToWideStdString(const godot::String& gstr);
 	std::string GetNameFromPath(godot::String gstr);
+	bool IsPathInsidePath(const std::string& firstPath, const std::string& secondPath);
 	String GenerateStandardUIDFromPath(String resourcePath);
 	String GenerateStandardUIDFromPath(const Resource* resourcePtr);
 	std::string GenerateRandomHashString();
@@ -1102,6 +1107,8 @@ namespace jenova
 	void CheckForRuntimeUpdate();
 	std::string FormatTimestampToStdString(time_t timestamp);
 	void SwitchToJenovaTerminalTab();
+	String GradientText(const String& text, const Color& from, const Color& to);
+	String SignatureText(const String& sig);
 	#pragma endregion
 
 	// Crash Handlers

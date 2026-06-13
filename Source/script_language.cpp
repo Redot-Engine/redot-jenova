@@ -16,7 +16,7 @@
 #include "Jenova.hpp"
 
 // Jenova Script Language Implementation
-static CPPScriptLanguage* cpp_language;
+static CPPScriptLanguage* cpp_language = nullptr;
 CPPScriptLanguage* CPPScriptLanguage::get_singleton()
 {
 	return cpp_language;
@@ -91,7 +91,7 @@ bool CPPScriptLanguage::_is_control_flow_keyword(const String& p_keyword) const
 		jenova::GlobalSettings::ScriptActivatorIdentifier,
 		jenova::GlobalSettings::ScriptFunctionExportIdentifier
 	};
-	return control_flow_keywords.find(p_keyword.utf8().get_data()) != control_flow_keywords.end();
+	return control_flow_keywords.find(AS_STD_STRING(p_keyword)) != control_flow_keywords.end();
 }
 PackedStringArray CPPScriptLanguage::_get_comment_delimiters() const
 {
@@ -213,6 +213,10 @@ String CPPScriptLanguage::_auto_indent_code(const String& p_code, int32_t p_from
 {
 	return String();
 }
+ScriptLanguage::ScriptNameCasing CPPScriptLanguage::_preferred_file_name_casing() const
+{
+	return ScriptNameCasing::SCRIPT_NAME_CASING_AUTO;
+}
 bool CPPScriptLanguage::_can_make_function() const
 {
 	return true;
@@ -278,12 +282,20 @@ void CPPScriptLanguage::_reload_all_scripts()
 }
 void CPPScriptLanguage::_reload_scripts(const Array& p_scripts, bool p_soft_reload)
 {
-	// Called when A Script gets Edited While Game is Running In Debug Mode
-	jenova::VerboseByID(__LINE__, "_reload_scripts Called");
+	for (const Variant& v : p_scripts)
+	{
+		Ref<CPPScript> script = v;
+		if (script.is_valid())
+		{
+			script->ReloadScriptSourceCode();
+			script->reload(p_soft_reload);
+		}
+	}
 }
 void CPPScriptLanguage::_reload_tool_script(const Ref<Script>& p_script, bool p_soft_reload)
 {
-	jenova::VerboseByID(__LINE__, "_reload_tool_script Called");
+	Array scripts = { p_script };
+	_reload_scripts(scripts, p_soft_reload);
 }
 PackedStringArray CPPScriptLanguage::_get_recognized_extensions() const
 {
@@ -363,8 +375,8 @@ Dictionary CPPScriptLanguage::_get_global_class_name(const String& p_path) const
 	return classInfo;
 }
 
-// Jenova Script Language Implementation
-static CPPHeaderLanguage* header_language;
+// Jenova Header Language Implementation
+static CPPHeaderLanguage* header_language = nullptr;
 CPPHeaderLanguage* CPPHeaderLanguage::get_singleton()
 {
 	return header_language;
@@ -478,6 +490,10 @@ Dictionary CPPHeaderLanguage::_lookup_code(const String& p_code, const String& p
 String CPPHeaderLanguage::_auto_indent_code(const String& p_code, int32_t p_from_line, int32_t p_to_line) const
 {
 	return String();
+}
+ScriptLanguage::ScriptNameCasing CPPHeaderLanguage::_preferred_file_name_casing() const
+{
+	return ScriptNameCasing::SCRIPT_NAME_CASING_AUTO;
 }
 bool CPPHeaderLanguage::_can_make_function() const
 {

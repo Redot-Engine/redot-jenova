@@ -56,7 +56,7 @@ StringName CPPScript::_get_instance_base_type() const
 }
 void* CPPScript::_instance_create(Object* p_for_object) const
 {
-	godot::Node* parentNode = godot::Object::cast_to<godot::Node>(p_for_object);
+	Node* parentNode = Object::cast_to<Node>(p_for_object);
 	jenova::VerboseByID(__LINE__, "Adding C++ Script (%s) Instance to (%s)", AS_C_STRING(this->get_path()), AS_C_STRING(parentNode->get_name()));
 	CPPScriptInstance* instance = memnew(CPPScriptInstance(p_for_object, Ref<CPPScript>(this)));
 	return CPPScriptInstance::create_native_instance(instance);
@@ -111,7 +111,7 @@ Error CPPScript::_reload(bool p_keep_state)
 StringName CPPScript::_get_doc_class_name() const
 {
 	/* Needs to be Implemented */
-	return "CPPScript";
+	return jenova::GlobalSettings::JenovaScriptType;
 }
 TypedArray<Dictionary> CPPScript::_get_documentation() const
 {
@@ -242,7 +242,7 @@ Variant CPPScript::_get_rpc_config() const
 void CPPScript::SetDefaultSourceCode()
 {
 	// Set Default Source Code
-	source_code = CODE_TEMPLATE(CODE_TEMPLATE_DEFAULT);
+	set_source_code(CODE_TEMPLATE(CODE_TEMPLATE_DEFAULT));
 }
 jenova::ScriptIdentifier CPPScript::GetScriptIdentity() const
 {
@@ -250,7 +250,7 @@ jenova::ScriptIdentifier CPPScript::GetScriptIdentity() const
 }
 void CPPScript::ReloadScriptSourceCode()
 {
-	source_code = FileAccess::get_file_as_string(this->get_path());
+	set_source_code(FileAccess::get_file_as_string(this->get_path()));
 }
 
 // CPPScript Initializer/Destructor
@@ -329,9 +329,9 @@ bool CPPHeader::_is_placeholder_fallback_enabled() const { return false; }
 Variant CPPHeader::_get_rpc_config() const { return Variant(); }
 void CPPHeader::ReloadHeaderSourceCode()
 {
-	source_code = FileAccess::get_file_as_string(this->get_path());
+	set_source_code(FileAccess::get_file_as_string(this->get_path()));
 }
 CPPHeader::CPPHeader()
 {
-	this->source_code = "#pragma once\n";
+	set_source_code("#pragma once\n");
 }
